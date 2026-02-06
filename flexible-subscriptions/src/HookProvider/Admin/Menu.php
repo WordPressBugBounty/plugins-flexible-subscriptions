@@ -1,0 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+namespace WPDesk\FlexibleSubscriptions\HookProvider\Admin;
+
+use WPDesk\FlexibleSubscriptions\Utils\HookProvider;
+
+class Menu implements HookProvider {
+	public function hooks(): void {
+		add_action( 'admin_menu', $this );
+	}
+
+	public function __invoke(): void {
+		add_menu_page(
+			__( 'Flexible Subscriptions', 'flexible-subscriptions' ),
+			__( 'Flexible Subscriptions', 'flexible-subscriptions' ),
+			'edit_others_shop_orders',
+			'flexible-subscriptions',
+			null,
+			'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmVyc2lvbj0iMS4yIj48cGF0aCBmaWxsPSIjOWJhMmE2IiBkPSJNMTUuNiAxMmMuNSAxLjgtLjUgMy41LTIuMiAzLjlsLjMgMS4zYzIuNS0uNiAzLjktMyAzLjItNS41cS0uMy0xLTEtMS44Yy0uMi0uMi0xLjIuNi0xIC45cS41LjUuNyAxLjIiLz48cGF0aCBmaWxsPSIjOWJhMmE2IiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Im0xMS44IDE3IDEuNC0yIC44IDN6Ii8+PHBhdGggZmlsbD0iIzliYTJhNiIgZD0iTTQuNCA3LjdjLS4yLTEuOCAxLTMuNCAyLjgtMy42TDcgMi44Yy0yLjUuMy00LjIgMi41LTMuOSA1cS4yIDEuMS44IDEuOWMuMi4zIDEuMy0uNCAxLjEtLjdxLS40LS42LS42LTEuMyIvPjxwYXRoIGZpbGw9IiM5YmEyYTYiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTguOSAzLjMgNy4yIDVsLS4zLTN6bS42IDEwLjZjLTEuMy0uMS0yLjItLjUtMi45LTEuMmwxLTEuMnEuMi4yLjQuMy4yLjIuNC4zLjMuMS41LjJsLjYuMnYtMS44Yy0xLjItLjMtMi42LS43LTIuNi0yLjMgMC0xLjEgMS0yLjEgMi42LTIuMlY1LjFoMS4ybC0uMSAxLjFxMS41LjIgMi41IDFsLTEgMS4yYy0uNC0uNC0uOS0uNi0xLjUtLjd2MS41YzEuMy4zIDIuNy44IDIuNiAyLjMgMCAxLjMtLjggMi4zLTIuNiAyLjRWMTVsLTEuMS0uMXptMS4xLTIuOXYxLjVjLjYtLjEuOS0uNC45LS44cy0uNC0uNS0uOS0uN005LjUgOVY3LjZjLS41LjEtLjguMy0uOC43cy4zLjUuOC43Ii8+PC9zdmc+',
+			59
+		);
+	}
+}

@@ -1,0 +1,139 @@
+th.renewals, td.renewals {
+	width: 150px;
+}
+
+.subscription-status.status-active {
+	background: #c6e1c6;
+	color: #5b841b;
+}
+.subscription-status.status-expired {
+	background: #bd94af;
+	color: #724663;
+}
+.subscription-status.status-cancelled {
+	background: #e894a1;
+	color: #991013;
+}
+.subscription-status.status-pending-cancel {
+	background: #bfbfbf;
+	color: #737373;
+}
+
+body.post-type-fsb_subscription .add-items .button.refund-items {
+	display: none;
+}
+
+/*****************************************
+* SUBSCRIPTION ADMIN EDIT
+*****************************************/
+
+#flexible-subscription-data .handlediv, #flexible-subscription-data h2.hndle, #flexible-subscription-data h3.hndle, #flexible-subscription-data .postbox-header {
+	display: none;
+}
+
+#billing-schedule table {
+	width: 100%;
+}
+#billing-schedule table tr {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	padding: 5px 0;
+	text-align: left;
+}
+
+#billing-schedule :is(input,select) {
+	width: 100%;
+}
+
+#billing-schedule .billing-frequency {
+	display: flex;
+	justify-content: space-between;
+}
+
+/******************************************************
+* PRODUCT EDIT
+******************************************************/
+
+.fsb-fields-group .form-fieldset {
+	display: flex;
+}
+
+.fsb-fields-group .form-fieldset legend,
+.fsb-fields-group .form-fieldset .woocommerce-help-tip {
+	align-self: center;
+}
+
+.product-frequency-fields {
+	display: flex;
+	gap: 2%;
+}
+
+/* Although, ugly, this is required to override WooCommerce's default css specifity */
+@layer override {
+	.product-frequency-fields .form-field {
+		width: 100%;
+		max-width: unset !important;
+		margin: 0 !important;
+		padding: 0 !important;
+	}
+
+.product-frequency-fields .form-field :is(select, input) {
+	width: 100% !important;
+}
+}
+
+.product-frequency-fields .form-field :is(select, p) {
+	max-width: unset;
+}
+
+.product-frequency-fields .form-info-glue {
+	width: 33%;
+	text-align: center;
+	align-self: center;
+}
+
+.product-frequency-fields .label_hidden label,
+.label_hidden label {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	border: 0;
+}
+
+
+/********** Variation product edit **********/
+.fsb-variable-fields-group .short {
+	width: 48%;
+}
+
+.fsb-variable-fields-group .form-fieldset legend {
+	width: 100%;
+}
+
+.variable-frequency-fields {
+	display: flex;
+	gap: 2%;
+}
+
+.variable-frequency-fields .form-info-glue {
+	width: 33%;
+	text-align: center;
+	align-self: center;
+}
+
+.variable-frequency-fields .form-field {
+	width: 100%;
+}
+
+/*****************************************
+* FSB SETTINGS
+*****************************************/
+
+article[id^="fsb-settings_"] {
+	max-width: 700px;
+}

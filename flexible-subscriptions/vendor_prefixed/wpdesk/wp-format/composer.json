@@ -1,0 +1,53 @@
+{
+    "name": "wpdesk\/wp-format",
+    "type": "library",
+    "description": "Formatting of any kind, especially dates",
+    "keywords": [
+        "wpdesk",
+        "wp-format"
+    ],
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "WPDesk\\FlexibleSubscriptions\\Vendor\\WPDesk\\Format\\": "src\/"
+        }
+    },
+    "authors": [
+        {
+            "name": "WP Desk",
+            "homepage": "https:\/\/wpdesk.net",
+            "role": "Owner"
+        },
+        {
+            "name": "Bartek Jaskulski",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.4 | ^8"
+    },
+    "require-dev": {
+        "phpunit\/phpunit": "^9.5",
+        "wpdesk\/wp-code-sniffer": "^1",
+        "wpdesk\/phpstan-rules": "^1",
+        "nesbot\/carbon": "^2 | ^3.5"
+    },
+    "suggest": {
+        "nesbot\/carbon": "Human-friendly date formatting"
+    },
+    "extra": {
+        "text-domain": "wp-format",
+        "translations-folder": "lang"
+    },
+    "scripts": {
+        "test": "phpunit",
+        "check-style": "phpcs src tests",
+        "fix-style": "phpcbf src tests"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect\/phpcodesniffer-composer-installer": true,
+            "phpstan\/extension-installer": true
+        }
+    }
+}

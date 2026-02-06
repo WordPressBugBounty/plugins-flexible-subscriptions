@@ -1,0 +1,60 @@
+{
+    "name": "wpdesk\/wp-forms",
+    "description": "WP Forms",
+    "authors": [
+        {
+            "name": "Marcin",
+            "email": "marcin@wpdesk.pl"
+        },
+        {
+            "name": "Krzysiek",
+            "email": "krzysiek@wpdesk.pl"
+        },
+        {
+            "name": "Piotr Potrebka",
+            "email": "piotr.potrebka@wpdesk.pl"
+        }
+    ],
+    "require": {
+        "php": ">=7.4 || ^8",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "wpdesk\/wp-persistence": "^2.0|^3.0",
+        "wpdesk\/wp-view": "^2"
+    },
+    "require-dev": {
+        "phpunit\/phpunit": "^9",
+        "wpdesk\/phpstan-rules": "^1",
+        "wpdesk\/wp-code-sniffer": "^1.2.3",
+        "10up\/wp_mock": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "WPDesk\\FlexibleSubscriptions\\Vendor\\WPDesk\\Forms\\": "src\/"
+        }
+    },
+    "autoload-dev": {},
+    "extra": {
+        "text-domain": "wp-forms",
+        "translations-folder": "lang",
+        "po-files": {
+            "pl_PL": "pl_PL.po",
+            "de_DE": "de_DE.po"
+        }
+    },
+    "scripts": {
+        "phpcs": "phpcs",
+        "phpstan": "php -d memory_limit=1G vendor\/bin\/phpstan",
+        "phpcbf": "phpcbf src",
+        "phpunit-unit": "phpunit --configuration phpunit-unit.xml --coverage-text --colors=never",
+        "phpunit-unit-fast": "phpunit --configuration phpunit-unit.xml --no-coverage",
+        "phpunit-integration": "phpunit --configuration phpunit-integration.xml --coverage-text --colors=never",
+        "phpunit-integration-fast": "phpunit --configuration phpunit-integration.xml --no-coverage"
+    },
+    "config": {
+        "allow-plugins": {
+            "phpstan\/extension-installer": true,
+            "dealerdirect\/phpcodesniffer-composer-installer": true
+        }
+    }
+}

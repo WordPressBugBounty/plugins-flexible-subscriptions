@@ -1,0 +1,88 @@
+{
+	"name": "wpdesk/flexible-subscriptions",
+	"autoload": {
+		"psr-4": {
+			"WPDesk\\FlexibleSubscriptions\\": "src"
+		},
+		"classmap": [
+			"vendor_prefixed"
+		]
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"WPDesk\\FlexibleSubscriptions\\Testing\\Integration\\": "tests/codeception/tests/integration"
+		}
+	},
+	"config": {
+		"autoloader-suffix": "FlexibleSubscriptions",
+		"sort-packages": true,
+		"platform": {
+			"php": "7.4.33"
+		},
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true,
+			"cweagans/composer-patches": true,
+			"wpdesk/wp-codeception": true,
+			"wpdesk/wp-wpdesk-composer": true,
+			"kylekatarnls/update-helper": true,
+			"phpstan/extension-installer": true
+		},
+		"platform-check": false,
+		"gitlab-domains": ["gitlab.wpdesk.dev"]
+	},
+	"prefer-stable": true,
+	"require": {
+		"php": ">=7.4|^8",
+		"psr/log": "^1.1.4",
+		"wpdesk/wp-wpdesk-helper-override": "^1.1.0"
+	},
+	"require-dev": {
+		"brain/monkey": "^2",
+		"wpdesk/php-di": "^6.3",
+		"phpunit/phpunit": "<10",
+		"woocommerce/action-scheduler": "*",
+		"wpdesk/order-data-transfer": "^1.0",
+		"wpdesk/phpstan-rules": "^1.1",
+		"wpdesk/wp-basic-requirements": "^3.6",
+		"wpdesk/wp-clock": "^1.0",
+		"wpdesk/wp-code-sniffer": "^1",
+		"wpdesk/wp-codeception": "^2.11",
+		"wpdesk/wp-format": "^1.0",
+		"wpdesk/wp-forms": "^3",
+		"wpdesk/wp-init": "0.10.*",
+		"wpdesk/wp-interval": "^1.0",
+		"wpdesk/wp-logs": "^1",
+		"wpdesk/wp-notice": "^3",
+		"wpdesk/wp-wpdesk-composer": "^3",
+		"wpdesk/wp-wpdesk-marketing": "^1.1",
+		"wpdesk/wp-wpdesk-tracker": "^3.9.3"
+	},
+	"extra": {
+		"text-domain": "flexible-subscriptions",
+		"translations-folder": "lang",
+		"translation-file-headers": {
+			"Project-Id-Version": "Plugin Template",
+			"Last-Translator": "Grzegorz Rola <grola@wpdesk.pl>",
+			"X-Poedit-WPHeader": "flexible-subscriptions.php"
+		},
+		"po-files": {
+			"pl_PL": "pl_PL.po"
+		}
+	},
+	"scripts": {
+		"phpcs": "phpcs",
+		"phpcbf": "phpcbf src",
+		"phpunit-unit": "phpunit --configuration phpunit-unit.xml --coverage-text --colors=never",
+		"phpunit-unit-coverage": "phpunit --configuration phpunit-unit.xml --coverage-html build-coverage",
+		"phpunit-integration": "phpunit --configuration phpunit-integration.xml --coverage-text --colors=never",
+		"docs": "apigen generate"
+	},
+	"repositories": {
+		"wpdesk": {
+			"type": "composer",
+			"url": "https://gitlab.wpdesk.dev/api/v4/group/wpdesk/-/packages/composer/"
+		}
+	},
+	"version": "1.7.3",
+	"type": "wordpress-plugin"
+}
