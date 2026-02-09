@@ -22,7 +22,7 @@ final class SubscriptionErrorsNotice implements HookProvider {
 	}
 
 	public function hooks(): void {
-		add_action( 'admin_notices', $this );
+		add_action( 'admin_notices', [ $this, '__invoke' ] );
 	}
 
 	public function __invoke(): void {

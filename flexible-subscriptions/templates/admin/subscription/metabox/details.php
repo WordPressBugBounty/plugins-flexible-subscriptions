@@ -79,10 +79,25 @@ $subscription_title = $subscription->get_data_store()->get_title( $subscription 
 					<label for="order_status"><?php esc_html_e( 'Subscription status:', 'flexible-subscriptions' ); ?></label>
 					<select id="order_status" name="order_status" class="wc-enhanced-select">
 						<?php
-						$statuses = Status::get_statuses();
-						foreach ( $statuses as $status => $status_name ) {
-							if ( $lifecycle->can_transition( $subscription, $status ) || $subscription->has_status( $status ) ) {
-								echo '<option value="' . esc_attr( $status ) . '" ' . selected( $status, 'wc-' . $subscription->get_status(), false ) . '>' . esc_html( $status_name ) . '</option>';
+						$statuses          = Status::get_statuses();
+						$current_status    = (string) $subscription->get_status();
+						$normalized_status = $current_status;
+						if ( '' !== $normalized_status && ! str_starts_with( $normalized_status, 'wc-' ) ) {
+							$normalized_status = 'wc-' . $normalized_status;
+						}
+
+						$is_current_valid   = '' !== $normalized_status && isset( $statuses[ $normalized_status ] );
+						$initial_statuses   = [
+							Status::PENDING => $statuses[ Status::PENDING ],
+							Status::ON_HOLD => $statuses[ Status::ON_HOLD ],
+							Status::ACTIVE  => $statuses[ Status::ACTIVE ],
+						];
+						$available_statuses = $is_current_valid ? $statuses : $initial_statuses;
+						$selected_status    = $is_current_valid ? $normalized_status : Status::PENDING;
+
+						foreach ( $available_statuses as $status => $status_name ) {
+							if ( ! $is_current_valid || $lifecycle->can_transition( $subscription, $status ) || $subscription->has_status( $status ) ) {
+								echo '<option value="' . esc_attr( $status ) . '" ' . selected( $status, $selected_status, false ) . '>' . esc_html( $status_name ) . '</option>';
 							}
 						}
 						?>

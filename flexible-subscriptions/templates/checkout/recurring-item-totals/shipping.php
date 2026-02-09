@@ -22,22 +22,26 @@ if ( $candidate->is_one_time_payment() || ! $candidate->needs_shipping() ) {
 	return;
 }
 
-$initial_packages = WC()->shipping()->get_packages();
-if ( empty( $initial_packages ) ) {
+$package_selections = $candidate->get_package_selections();
+
+if ( empty( $package_selections ) ) {
 	$this->output_render( 'checkout/recurring-item-totals/shipping/no-shipping', $params );
 	return;
 }
 
-$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods', [] );
+foreach ( $package_selections as $package_data ) {
+	$rates = $package_data->get_rates();
 
-foreach ( $candidate->get_shipping_packages() as $recurring_cart_package_key => $recurring_cart_package ) {
-	$package_index = isset( $recurring_cart_package['package_index'] ) ? $recurring_cart_package['package_index'] : 0;
-	$package       = WC()->shipping()->calculate_shipping_for_package( $recurring_cart_package );
+	if ( empty( $rates ) ) {
+		$this->output_render( 'checkout/recurring-item-totals/shipping/no-shipping', $params );
+		return;
+	}
+	$selected_method = $package_data->get_selected_method();
 
-	if ( count( $package['rates'] ) === 1 ) {
-		$shipping_method = array_values( $package['rates'] )[0];
-	} elseif ( count( $package['rates'] ) > 1 && isset( $chosen_shipping_methods[ $recurring_cart_package_key ] ) ) {
-		$shipping_method = $package['rates'][ $chosen_shipping_methods[ $recurring_cart_package_key ] ];
+	if ( count( $rates ) === 1 ) {
+		$shipping_method = array_values( $rates )[0];
+	} elseif ( count( $rates ) > 1 && $selected_method && isset( $rates[ $selected_method ] ) ) {
+		$shipping_method = $rates[ $selected_method ];
 	} else {
 		$this->output_render( 'checkout/recurring-item-totals/shipping/not-selected' );
 		return;

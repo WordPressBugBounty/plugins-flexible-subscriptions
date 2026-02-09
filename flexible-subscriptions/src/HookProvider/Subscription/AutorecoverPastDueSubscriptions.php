@@ -40,11 +40,19 @@ final class AutorecoverPastDueSubscriptions implements HookProvider {
 	}
 
 	public function hooks(): void {
-		if ( function_exists( 'as_next_scheduled_action' ) && false === as_next_scheduled_action( self::ACTION ) ) {
-			as_schedule_recurring_action( (int) strtotime( 'midnight tonight' ), \DAY_IN_SECONDS, self::ACTION );
+		if ( did_action( 'action_sheduler_init' ) ) {
+			$this->hook_schedule();
+		} else {
+			add_action( 'action_sheduler_init', [ $this, 'hook_schedule' ] );
 		}
 
 		add_action( self::ACTION, $this );
+	}
+
+	public function hook_schedule(): void {
+		if ( false === as_next_scheduled_action( self::ACTION ) ) {
+			as_schedule_recurring_action( (int) strtotime( 'midnight tonight' ), \DAY_IN_SECONDS, self::ACTION );
+		}
 	}
 
 	public function __invoke(): void {

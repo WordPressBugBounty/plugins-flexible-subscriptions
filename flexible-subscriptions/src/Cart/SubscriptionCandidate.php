@@ -2,26 +2,25 @@
 
 namespace WPDesk\FlexibleSubscriptions\Cart;
 
-use WPDesk\FlexibleSubscriptions\PaymentMethodSeeker;
 use WPDesk\FlexibleSubscriptions\Product\SubscriptionProductWrapper;
-use WPDesk\FlexibleSubscriptions\Subscription\Subscription;
+use WPDesk\FlexibleSubscriptions\Subscription\Proposal\Model\RecurringLineItem;
+use WPDesk\FlexibleSubscriptions\Subscription\Proposal\Model\RecurringShippingPackage;
+use WPDesk\FlexibleSubscriptions\Subscription\Proposal\Model\SubscriptionProposal;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Interval\WPInterval;
 
 /**
- * An important note about SubscriptionCandidate is that it can be used as sort of a replacement for
+ * An important note about SubscriptionCandidate is that it can be used as a sort of replacement for
  * \WC_Cart class. All method calls are passed to \WC_Cart if not found in this class and our own
  * overrides are handy across the plugin (but not especially suitable for external usage). Think of
  * it as inheritance without extending or simply a decorator.
  *
  * @phpstan-type Package array{
  * 'contents': array{},
- * 'package_index'?: int,
  * 'contents_cost': float,
  * }
  *
  * @method float get_coupon_discount_amount( string $code, bool $ex_tax = true )
  * @method bool display_prices_including_tax()
- * @method string get_displayed_subtotal()
  * @method float get_total_tax()
  * @method float get_shipping_total()
  * @method float get_shipping_tax()
@@ -31,52 +30,29 @@ use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Interval\WPInterval;
  * @method float get_taxes_total( bool $compound = true, bool $display = true )
  * @method bool remove_coupon( string $coupon_code )
  * @method void calculate_totals()
+ * @method void apply_coupon( string $coupon_code )
+ *
  * @property-read float $tax_total
  */
 class SubscriptionCandidate implements SubscriptionCandidateInterface {
 
-	/** @var \WC_Cart */
-	private $cart;
+	private \WC_Cart $cart;
 
-	/** @var SingularCartItem[] */
-	private $contents = [];
+	private ?\DateTimeInterface $start_date = null;
 
-	/** @var \DateTimeInterface */
-	private $start_date;
+	private SubscriptionProposal $proposal;
 
-	private WPInterval $billing_frequency;
+	/** @var RecurringShippingPackage[] */
+	private array $package_selections = [];
 
-	private ?WPInterval $trial_duration = null;
-
-	private ?WPInterval $expiration = null;
-
-	/**
-	 * Cart item key for grouped recurring items.
-	 *
-	 * @var string
-	 */
-	private $group;
-
-	/**
-	 * We are using internal flag to mark that our object is complete with
-	 * whole date related calculations which are performed lazily on
-	 * request.
-	 *
-	 * This is to internalize properties setters and prepare access to
-	 * getters only when necessary (during subscription creation).
-	 *
-	 * @var bool
-	 */
-	private $initialized = false;
-
-	public function __construct( \WC_Cart $cart, string $group ) {
+	public function __construct( SubscriptionProposal $proposal, \WC_Cart $cart ) {
 		// Cleanup cart on construct.
 		$this->cart = $cart;
-		$this->cart->fees_api()->remove_all_fees();
-		$this->cart->cart_contents         = [];
-		$this->cart->removed_cart_contents = [];
+		$this->cart->empty_cart( false );
 
-		$this->group = $group;
+		$this->proposal = $proposal;
+		// todo: unclean, but we need to populate cart contents for totals calculation
+		$this->add_items( $proposal->get_items() );
 	}
 
 	/**
@@ -87,17 +63,16 @@ class SubscriptionCandidate implements SubscriptionCandidateInterface {
 	public function __toString(): string {
 		return json_encode(
 			[
-				'group'             => $this->get_group(),
+				'group'             => $this->proposal->get_key(),
 				'products'          => array_map(
-					static function ( SingularCartItem $item ) {
-						['product_id' => $product_id, 'quantity' => $quantity, 'total' => $total] = $item->to_array();
+					static function ( RecurringLineItem $item ) {
 						return [
-							'product_id' => $product_id,
-							'quantity'   => $quantity,
-							'total'      => $total,
+							'product_id' => $item->get_product_id(),
+							'quantity'   => $item->get_quantity(),
+							'total'      => $item->get_line_total(),
 						];
 					},
-					$this->contents
+					$this->proposal->get_items()
 				),
 				'total'             => $this->get_total(),
 				'billing_frequency' => (string) $this->get_billing_frequency(),
@@ -107,12 +82,11 @@ class SubscriptionCandidate implements SubscriptionCandidateInterface {
 		);
 	}
 
-	public function add_item( SingularCartItem $item ): void {
-		$this->contents[]            = $item;
+	public function add_item( RecurringLineItem $item ): void {
 		$this->cart->cart_contents[] = $item->to_array();
 	}
 
-	/** @param SingularCartItem[] $items */
+	/** @param RecurringLineItem[] $items */
 	public function add_items( array $items ): void {
 		foreach ( $items as $i ) {
 			$this->add_item( $i );
@@ -120,23 +94,15 @@ class SubscriptionCandidate implements SubscriptionCandidateInterface {
 	}
 
 	public function is_empty(): bool {
-		return count( $this->contents ) === 0;
+		return $this->proposal->is_empty();
 	}
 
 	public function get_billing_frequency(): WPInterval {
-		if ( ! $this->initialized ) {
-			$this->calculate_own_properties();
-		}
-
-		return $this->billing_frequency;
+		return $this->proposal->get_plan()->get_billing_frequency();
 	}
 
 	public function get_trial_duration(): ?WPInterval {
-		if ( ! $this->initialized ) {
-			$this->calculate_own_properties();
-		}
-
-		return $this->trial_duration;
+		return $this->proposal->get_plan()->get_trial_period();
 	}
 
 	public function has_trial(): bool {
@@ -152,10 +118,10 @@ class SubscriptionCandidate implements SubscriptionCandidateInterface {
 	}
 
 	public function get_start_date(): \DateTimeInterface {
-		if ( ! $this->initialized ) {
-			$this->calculate_own_properties();
-		}
-		return $this->start_date;
+		return $this->start_date ??= new \DateTimeImmutable(
+			gmdate( 'Y-m-d H:i:s' ),
+			new \DateTimeZone( 'UTC' )
+		);
 	}
 
 	public function get_first_payment_date(): \DateTimeInterface {
@@ -167,10 +133,7 @@ class SubscriptionCandidate implements SubscriptionCandidateInterface {
 	}
 
 	public function get_expiration(): ?WPInterval {
-		if ( ! $this->initialized ) {
-			$this->calculate_own_properties();
-		}
-		return $this->expiration;
+		return $this->proposal->get_plan()->get_expiration();
 	}
 
 	/**
@@ -213,6 +176,40 @@ class SubscriptionCandidate implements SubscriptionCandidateInterface {
 		return $this->cart;
 	}
 
+	public function get_shipping_package_key( $package_index ): string {
+		return 'fsb_' . $this->proposal->get_key() . '_' . $package_index;
+	}
+
+	/**
+	 * @param array<string, string> $methods
+	 */
+	public function set_shipping_methods( array $methods ): void {
+		$this->proposal->set_shipping_methods( $methods );
+	}
+
+	/**
+	 * @return array<string, string>
+	 */
+	public function get_shipping_methods(): array {
+		return $this->proposal->get_shipping_methods();
+	}
+
+	public function get_shipping_method( string $package_key ): ?string {
+		$methods = $this->proposal->get_shipping_methods();
+
+		return $methods[ $package_key ] ?? null;
+	}
+
+	/** @param RecurringShippingPackage[] $selections */
+	public function set_package_selections( array $selections ): void {
+		$this->package_selections = $selections;
+	}
+
+	/** @return RecurringShippingPackage[] */
+	public function get_package_selections(): array {
+		return $this->package_selections;
+	}
+
 	public function needs_payment(): bool {
 		return $this->cart->needs_payment();
 	}
@@ -244,51 +241,26 @@ class SubscriptionCandidate implements SubscriptionCandidateInterface {
 			}
 		}
 
+		foreach ( $packages as $key => $package ) {
+			// Remap to our custom keys to avoid collision with main WooCommerce packages.
+			if ( is_numeric( $key ) ) {
+				$package_key                   = $this->get_shipping_package_key( $key );
+				$package['recurring_cart_key'] = $this->proposal->get_key();
+				$package['package_key']        = $package_key;
+				$packages[ $package_key ]      = $package;
+				unset( $packages[ $key ] );
+			}
+		}
+
 		return $packages;
 	}
 
 	public function get_group(): string {
-		return $this->group;
+		return $this->proposal->get_key();
 	}
 
 	public function is_one_time_payment(): bool {
-		if ( ! $this->initialized ) {
-			$this->calculate_own_properties();
-		}
-
-		if ( $this->expiration instanceof WPInterval ) {
-			return $this->billing_frequency->equalTo( $this->expiration );
-		}
-
-		return false;
-	}
-
-	private function calculate_own_properties(): void {
-		if ( $this->initialized ) {
-			return;
-		}
-
-		if ( $this->is_empty() ) {
-			throw new \RuntimeException( 'Cart is empty' );
-		}
-
-		// We only take first product from the current group, as
-		// products are grouped by the same date properties so it's
-		// should be safe assumption for now.
-		[$cart_item] = $this->contents;
-
-		$product = $cart_item->get_product();
-
-		$this->start_date = new \DateTimeImmutable(
-			gmdate( 'Y-m-d H:i:s' ),
-			new \DateTimeZone( 'UTC' )
-		);
-
-		$this->billing_frequency = $product->get_billing_frequency();
-		$this->trial_duration    = $product->get_trial_duration();
-		$this->expiration        = $product->get_expiration();
-
-		$this->initialized = true;
+		return $this->proposal->get_plan()->is_one_time();
 	}
 
 	public function get_created_via(): string {

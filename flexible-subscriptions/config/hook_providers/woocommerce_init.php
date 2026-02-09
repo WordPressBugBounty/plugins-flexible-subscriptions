@@ -50,6 +50,7 @@ return [
 	Checkout\ForceCheckoutEnabled::class,
 	Checkout\OrderRelatedSubscriptionsDetails::class,
 	Checkout\SubscriptionCheckout::class,
+	Checkout\RecurringShippingOptions::class,
 	Compatibility\HookMapper::class,
 	Compatibility\StatusHookMapper::class,
 	Coupons\SubscriptionCouponTypes::class,

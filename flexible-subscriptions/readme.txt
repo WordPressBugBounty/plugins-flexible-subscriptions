@@ -6,7 +6,7 @@ Donate link: https://wpdesk.net/sk/flexible-subscriptions-rm-donate
 Requires at least: 6.3
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.7.3
+Stable tag: 1.7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,13 +16,13 @@ Meet Flexible Subscriptions for WooCommerce. The best & free plugin for recurrin
 
 ★★★★★
 
-### The best free alternative to the WooCommerce Subscriptions plugin
+### A free alternative to the WooCommerce Subscriptions plugin
 
 💡 **Fully compatible with the new WooCommerce Checkout Block!**
 
 Flexible Subscriptions has been updated by our developers to fully support the latest WooCommerce checkout experience.
-Your subscription products now work perfectly with the new, faster, and conversion-optimized Checkout flow — no extra setup required.
-Stay future-proof and enjoy seamless compatibility with WooCommerce’s newest features!
+Your subscription products now work smoothly with the new, faster, and conversion-optimized Checkout flow — no extra setup required.
+Stay compatible with upcoming WooCommerce features and updates.
 
 ### Sell subscriptions in WooCommerce easily
 
@@ -67,6 +67,7 @@ Extend the free core plugin with optional premium add-ons:
 – [Flexible Subscriptions Stock Management](https://wpdesk.net/sk/flexible-subscriptions-stock-readme) – cancel subscriptions based on product stock
 – [Flexible Subscriptions One-Time Payment](https://wpdesk.net/sk/one-time-payment-readme) – enable subscriptions only for selected product variations (size, version, or flavor)
 - [Flexible Subscriptions - API Integration](https://wpdesk.net/sk/fsb-api-integration) - manage subscriptions from your own systems with direct JSON access to data, orders, and notes
+- [Flexible Subscriptions - Emails](https://wpdesk.net/sk/flexible-subscriptions-emails-readme) - automatically send transactional emails about renewals and subscription status changes to customers and administrators
 
 ### 🛠 Easy setup – no coding required
 
@@ -159,6 +160,13 @@ Please report security bugs found in the source code of the Flexible Subscriptio
 19. Support tab with quick instructions about the plugin.
 
 == Changelog ==
+
+= 1.7.4 - 2026-02-09 =
+* Improved how shipping is selected for subscriptions. Now, when some shipping methods are not available for subscription products, user will be able to select from applicable ones per subscription in context of mixed checkouts.
+* Adding subscription manually in admin panel no longer results in errors.
+* Fixed conflict with Duplicator plugin causing site error.
+* Fixed saving standard products in admin panel being blocked when Flexible Subscriptions is active.
+* Fixed Action Scheduler notice.
 
 = 1.7.3 - 2026-01-21 =
 * Added support for WooCommerce 10.5

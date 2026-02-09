@@ -12,6 +12,7 @@ use WPDesk\FlexibleSubscriptions\HookProvider\Admin\SettingsPage;
 use WPDesk\FlexibleSubscriptions\HookProvider\Admin\SubscriptionColumns;
 use WPDesk\FlexibleSubscriptions\HookProvider\Cart\DisplayRecurringTotals;
 use WPDesk\FlexibleSubscriptions\HookProvider\Checkout\OrderRelatedSubscriptionsDetails;
+use WPDesk\FlexibleSubscriptions\HookProvider\Checkout\RecurringShippingOptions;
 use WPDesk\FlexibleSubscriptions\HookProvider\Email\OrderAdditionalInfo;
 use WPDesk\FlexibleSubscriptions\HookProvider\Marketing\SupportPage;
 use WPDesk\FlexibleSubscriptions\HookProvider\Product\AddToCartTemplate;
@@ -99,6 +100,9 @@ return [
 	OrderAdditionalInfo::class              => autowire()
 		->constructorParameter( 'renderer', get( 'renderer.front' ) ),
 
+	RecurringShippingOptions::class              => autowire()
+		->constructorParameter( 'renderer', get( 'renderer.front' ) ),
+
 	PaymentMethodSeeker::class              => autowire(),
 
 	/* Validator::class => autowire() */
@@ -144,4 +148,6 @@ return [
 
 	SubscriptionFinderInterface::class      => autowire( SubscriptionFinder::class ),
 	RenewalFactory::class => autowire(),
+
+	WC_Shipping::class => static fn () => WC()->shipping()
 ];

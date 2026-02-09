@@ -9,6 +9,7 @@ use DateTimeZone;
 use WPDesk\FlexibleSubscriptions\Subscription\Subscription;
 use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionFinder;
 use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionUpdater;
+use WPDesk\FlexibleSubscriptions\Subscription\Utils\Status;
 use WPDesk\FlexibleSubscriptions\Utils\HookProvider;
 
 /**
@@ -26,7 +27,23 @@ class AdminSubscriptionUpdate implements HookProvider {
 	}
 
 	public function hooks(): void {
+		add_action( 'woocommerce_process_shop_order_meta', [ $this, 'ensure_order_status' ], 5, 1 );
 		add_action( 'woocommerce_process_shop_order_meta', $this, 40, 1 );
+	}
+
+	/** @param int $subscription_id */
+	public function ensure_order_status( $subscription_id ): void {
+		if ( Subscription::OBJECT_TYPE !== get_post_type( $subscription_id ) ) {
+			return;
+		}
+
+		if ( empty( $_POST['woocommerce_meta_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['woocommerce_meta_nonce'] ) ), 'woocommerce_save_data' ) ) {
+			return;
+		}
+
+		if ( empty( $_POST['order_status'] ) ) {
+			$_POST['order_status'] = Status::PENDING;
+		}
 	}
 
 	/** @param int $subscription_id */

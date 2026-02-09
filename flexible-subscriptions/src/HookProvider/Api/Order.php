@@ -6,7 +6,6 @@ namespace WPDesk\FlexibleSubscriptions\HookProvider\Api;
 
 use WPDesk\FlexibleSubscriptions\Cart\ApiSubscriptionCandidate;
 use WPDesk\FlexibleSubscriptions\Cart\SimilarOrderItems;
-use WPDesk\FlexibleSubscriptions\Product\SubscriptionProduct;
 use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionCreator;
 use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionFinder;
 use WPDesk\FlexibleSubscriptions\Utils\HookProvider;
@@ -65,7 +64,7 @@ class Order implements HookProvider {
 			return;
 		}
 
-		foreach ( $grouped_items as $group_hash => $items ) {
+		foreach ( $grouped_items as $items ) {
 			try {
 				$candidate = new ApiSubscriptionCandidate( $order, $items );
 

@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Flexible Subscriptions 1.7.3\n"
+"Project-Id-Version: Flexible Subscriptions 1.7.4\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/flexible-subscriptions\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-01-21T02:34:09+00:00\n"
+"POT-Creation-Date: 2026-02-09T14:50:41+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: flexible-subscriptions\n"
@@ -113,8 +113,8 @@ msgstr ""
 
 #: src/Admin/Settings/ProductsTab.php:30
 #: src/Admin/Settings/ProductsTab.php:35
-#: src/HookProvider/Product/ChangeAddButtonText.php:40
-#: src/Product/SubscriptionProductWrapper.php:71
+#: src/HookProvider/Product/ChangeAddButtonText.php:37
+#: src/Product/SubscriptionProductWrapper.php:82
 msgid "Sign up now"
 msgstr ""
 
@@ -406,7 +406,7 @@ msgid "Items"
 msgstr ""
 
 #: src/HookProvider/Admin/SubscriptionColumns.php:70
-#: assets/blocks/index.js:138
+#: assets/blocks/index.js:161
 #: assets/dist/index.js:10
 msgid "Total"
 msgstr ""
@@ -481,7 +481,7 @@ msgstr ""
 #. translators: placeholder is the display name of a payment gateway a subscription was paid by.
 #: src/HookProvider/Admin/SubscriptionColumns.php:291
 #: templates/checkout/recurring-item-totals/shipping/shipping-cost.php:19
-#: assets/blocks/index.js:116
+#: assets/blocks/index.js:139
 #: assets/dist/index.js:10
 #, php-format,js-format
 msgid "Via %s"
@@ -540,36 +540,40 @@ msgstr ""
 msgid "This product is not a type of subscription product and therefore cannot be added to a subscription."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:82
+#: src/HookProvider/Blocks/ExtendStoreApi.php:87
 msgid "Billing period for the subscription."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:87
+#: src/HookProvider/Blocks/ExtendStoreApi.php:92
 msgid "The number of billing periods between subscription renewals."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:92
+#: src/HookProvider/Blocks/ExtendStoreApi.php:97
 msgid "Subscription Product trial length."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:97
+#: src/HookProvider/Blocks/ExtendStoreApi.php:102
 msgid "Subscription Product trial period."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:102
+#: src/HookProvider/Blocks/ExtendStoreApi.php:107
 msgid "Subscription Product sign-up fee."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:157
+#: src/HookProvider/Blocks/ExtendStoreApi.php:169
 msgid "A list of recurring totals for subscriptions in the cart."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:169
+#: src/HookProvider/Blocks/ExtendStoreApi.php:181
 msgid "Human-readable billing frequency for the subscription."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:174
+#: src/HookProvider/Blocks/ExtendStoreApi.php:186
 msgid "Human-readable expiration for the subscription."
+msgstr ""
+
+#: src/HookProvider/Blocks/ExtendStoreApi.php:192
+msgid "Recurring shipping packages with rates."
 msgstr ""
 
 #: src/HookProvider/Cart/ShippingDetails.php:29
@@ -644,7 +648,7 @@ msgstr ""
 msgid "Variable Subscription"
 msgstr ""
 
-#: src/HookProvider/Subscription/AutorecoverOnHoldSubscriptions.php:63
+#: src/HookProvider/Subscription/AutorecoverOnHoldSubscriptions.php:71
 msgid "Subscription reactivated because the last payment request was successful."
 msgstr ""
 
@@ -755,6 +759,17 @@ msgstr ""
 msgid "Shipping for subscription products is normally charged on the initial order and all renewal orders. Enable this to only charge shipping once on the initial order. Note: for this setting to be enabled the subscription must not have a free trial or a synced renewal date."
 msgstr ""
 
+#: src/Product/SubscriptionProductWrapper.php:82
+msgid "Select options"
+msgstr ""
+
+#. translators: %s: billing frequency (e.g. "month" or "every 2 weeks").
+#: src/Subscription/Proposal/RecurringShippingResolver.php:53
+#: templates/checkout/recurring-shipping.php:42
+#, php-format
+msgid "Shipment every %s"
+msgstr ""
+
 #: src/Subscription/Renewal/ManualRenewal.php:13
 msgid "Manual renewal order awaiting customer payment."
 msgstr ""
@@ -863,7 +878,7 @@ msgstr[1] ""
 
 #. translators: placeholder is an order number.
 #: templates/admin/order/related-subscription.php:12
-#: templates/admin/subscription/metabox/details.php:100
+#: templates/admin/subscription/metabox/details.php:115
 #, php-format
 msgid "#%1$s"
 msgstr ""
@@ -972,92 +987,92 @@ msgstr ""
 msgid "Subscription status:"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:96
+#: templates/admin/subscription/metabox/details.php:111
 msgid "Initial order: "
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:108
+#: templates/admin/subscription/metabox/details.php:123
 msgid "Initial order:"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:112
+#: templates/admin/subscription/metabox/details.php:127
 msgid "Select an order&hellip;"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:124
+#: templates/admin/subscription/metabox/details.php:139
 msgid "Billing"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:125
-#: templates/admin/subscription/metabox/details.php:230
+#: templates/admin/subscription/metabox/details.php:140
+#: templates/admin/subscription/metabox/details.php:245
 msgid "Edit"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:127
+#: templates/admin/subscription/metabox/details.php:142
 msgid "Load billing address"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:135
-#: templates/admin/subscription/metabox/details.php:137
-#: templates/admin/subscription/metabox/details.php:241
-#: templates/admin/subscription/metabox/details.php:243
+#: templates/admin/subscription/metabox/details.php:150
+#: templates/admin/subscription/metabox/details.php:152
+#: templates/admin/subscription/metabox/details.php:256
+#: templates/admin/subscription/metabox/details.php:258
 msgid "Address"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:137
+#: templates/admin/subscription/metabox/details.php:152
 msgid "No billing address set."
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:158
-#: templates/admin/subscription/metabox/details.php:318
-#: templates/admin/subscription/metabox/details.php:331
+#: templates/admin/subscription/metabox/details.php:173
+#: templates/admin/subscription/metabox/details.php:333
+#: templates/admin/subscription/metabox/details.php:346
 msgid "Payment Method"
 msgstr ""
 
 #. translators: %s: gateway ID.
-#: templates/admin/subscription/metabox/details.php:163
-#: templates/admin/subscription/metabox/details.php:333
+#: templates/admin/subscription/metabox/details.php:178
+#: templates/admin/subscription/metabox/details.php:348
 #, php-format
 msgctxt "The gateway ID displayed on the Edit Subscriptions screen when editing payment method."
 msgid "Gateway ID: [%s]"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:219
+#: templates/admin/subscription/metabox/details.php:234
 msgid "Customer change payment method page &rarr;"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:221
+#: templates/admin/subscription/metabox/details.php:236
 msgid "Customer add payment method page &rarr;"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:229
+#: templates/admin/subscription/metabox/details.php:244
 #: templates/checkout/recurring-item-totals/shipping/failed-to-calculate.php:5
 #: templates/checkout/recurring-item-totals/shipping/no-shipping.php:5
 #: templates/checkout/recurring-item-totals/shipping/not-selected.php:5
 #: templates/checkout/recurring-item-totals/shipping/shipping-cost.php:16
-#: assets/blocks/index.js:112
+#: assets/blocks/index.js:135
 #: assets/dist/index.js:10
 msgid "Shipping"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:232
+#: templates/admin/subscription/metabox/details.php:247
 msgid "Load shipping address"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:233
+#: templates/admin/subscription/metabox/details.php:248
 msgid "Copy billing address"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:243
+#: templates/admin/subscription/metabox/details.php:258
 msgid "No shipping address set."
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:266
-#: templates/admin/subscription/metabox/details.php:303
+#: templates/admin/subscription/metabox/details.php:281
+#: templates/admin/subscription/metabox/details.php:318
 msgid "Customer Provided Note"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:304
+#: templates/admin/subscription/metabox/details.php:319
 msgid "Customer's notes about the order"
 msgstr ""
 
@@ -1194,7 +1209,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: templates/checkout/recurring-item-details.php:12
-#: assets/blocks/index.js:102
+#: assets/blocks/index.js:125
 #: assets/dist/index.js:10
 msgid "Details"
 msgstr ""
@@ -1223,24 +1238,12 @@ msgstr ""
 msgid "Tax"
 msgstr ""
 
-#: templates/checkout/recurring-shipping.php:22
-#, php-format
-msgctxt "shipping packages"
-msgid "Shipping %d"
-msgstr ""
-
-#: templates/checkout/recurring-shipping.php:22
-msgctxt "shipping packages"
-msgid "Shipping"
-msgstr ""
-
-#: templates/checkout/recurring-shipping.php:37
-#, php-format
-msgid "Shipment every %s"
+#: templates/checkout/recurring-shipping.php:47
+msgid "Recurring shipping"
 msgstr ""
 
 #: templates/checkout/recurring-totals.php:35
-#: assets/blocks/index.js:171
+#: assets/blocks/index.js:339
 #: assets/dist/index.js:10
 msgid "Total due today"
 msgstr ""
@@ -1841,33 +1844,33 @@ msgid "Next payment date updated because billing period changed."
 msgstr ""
 
 #. translators: %s: recurring interval string (e.g. "month" or "every 2 weeks").
-#: assets/blocks/index.js:59
+#: assets/blocks/index.js:82
 #: assets/dist/index.js:4
 #, js-format
 msgid "Recurring total (every %s)"
 msgstr ""
 
 #. translators: %s: expiration period (e.g. "for 6 months").
-#: assets/blocks/index.js:67
+#: assets/blocks/index.js:90
 #: assets/dist/index.js:7
 #, js-format
 msgid "for %s"
 msgstr ""
 
 #. translators: %s: formatted date.
-#: assets/blocks/index.js:74
+#: assets/blocks/index.js:97
 #: assets/dist/index.js:10
 #, js-format
 msgid "First renewal: %s"
 msgstr ""
 
-#: assets/blocks/index.js:87
+#: assets/blocks/index.js:108
 #: assets/dist/index.js:10
 msgid "Free"
 msgstr ""
 
 #. translators: %s is the subscription price to pay immediately (e.g. "$10").
-#: assets/blocks/index.js:182
+#: assets/blocks/index.js:350
 #: assets/dist/index.js:13
 #, js-format
 msgid "%s due today"

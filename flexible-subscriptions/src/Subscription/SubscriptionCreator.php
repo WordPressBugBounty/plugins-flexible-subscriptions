@@ -11,13 +11,17 @@ use WPDesk\FlexibleSubscriptions\PaymentMethodSeeker;
 use WPDesk\FlexibleSubscriptions\Subscription\Create\ApiSubscriptionStrategy;
 use WPDesk\FlexibleSubscriptions\Subscription\Create\CartSubscriptionStrategy;
 use WPDesk\FlexibleSubscriptions\Subscription\Create\SubscriptionCreationStrategy;
+use WPDesk\FlexibleSubscriptions\Utils\CartContext;
 
 class SubscriptionCreator {
 
 	private PaymentMethodSeeker $gateway_seeker;
 
-	public function __construct( PaymentMethodSeeker $gateway_seeker ) {
+	private CartContext $cart_context;
+
+	public function __construct( PaymentMethodSeeker $gateway_seeker, CartContext $cart_context ) {
 		$this->gateway_seeker = $gateway_seeker;
+		$this->cart_context   = $cart_context;
 	}
 
 	public function build_subscription( \WC_Order $order, SubscriptionCandidateInterface $candidate ): Subscription {
@@ -92,7 +96,7 @@ class SubscriptionCreator {
 
 	private function get_strategy( SubscriptionCandidateInterface $candidate ): SubscriptionCreationStrategy {
 		if ( $candidate instanceof SubscriptionCandidate ) {
-			return new CartSubscriptionStrategy( $candidate );
+			return new CartSubscriptionStrategy( $candidate, $this->cart_context );
 		}
 
 		if ( $candidate instanceof ApiSubscriptionCandidate ) {

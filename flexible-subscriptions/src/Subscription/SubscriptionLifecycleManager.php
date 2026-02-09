@@ -85,7 +85,7 @@ final class SubscriptionLifecycleManager {
 	}
 
 	public function can_transition( Subscription $subscription, string $to ): bool {
-		$from = $subscription->get_status();
+		$from = $this->normalize_status( $subscription->get_status() );
 		$to   = $this->resolve_target_status( $subscription, $to );
 
 		return isset( $this->transitions[ $from ][ $to ] );
@@ -94,7 +94,7 @@ final class SubscriptionLifecycleManager {
 	public function transition( Subscription $subscription, string $to, ?TransitionContext $context = null ): bool {
 		$context ??= TransitionContext::system();
 
-		$from = $subscription->get_status();
+		$from = $this->normalize_status( $subscription->get_status() );
 		$to   = $this->resolve_target_status( $subscription, $to );
 
 		if ( $from === $to ) {
@@ -395,7 +395,7 @@ final class SubscriptionLifecycleManager {
 
 	private function resolve_target_status( Subscription $subscription, string $to ): string {
 		$to   = $this->normalize_status( $to );
-		$from = $subscription->get_status();
+		$from = $this->normalize_status( $subscription->get_status() );
 
 		// Decide final status before persisting.
 		if ( $to === 'pending-cancel' && $from === 'pending' && $subscription->is_during_first_cycle() ) {

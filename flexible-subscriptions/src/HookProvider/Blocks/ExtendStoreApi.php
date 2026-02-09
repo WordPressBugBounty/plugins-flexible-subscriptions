@@ -5,17 +5,22 @@ namespace WPDesk\FlexibleSubscriptions\HookProvider\Blocks;
 
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CartItemSchema;
+use WPDesk\FlexibleSubscriptions\Cart\SubscriptionCandidate;
 use WPDesk\FlexibleSubscriptions\Cart\SubscriptionCandidatesList;
 use WPDesk\FlexibleSubscriptions\Product\SubscriptionProduct;
 use WPDesk\FlexibleSubscriptions\Product\SubscriptionProductWrapper;
+use WPDesk\FlexibleSubscriptions\Subscription\Proposal\RecurringShippingResolver;
 use WPDesk\FlexibleSubscriptions\Utils\HookProvider;
 
 class ExtendStoreApi implements HookProvider {
 
 	private SubscriptionCandidatesList $candidates;
 
-	public function __construct( SubscriptionCandidatesList $candidates ) {
-		$this->candidates = $candidates;
+	private RecurringShippingResolver $shipping_resolver;
+
+	public function __construct( SubscriptionCandidatesList $candidates, RecurringShippingResolver $shipping_resolver ) {
+		$this->candidates        = $candidates;
+		$this->shipping_resolver = $shipping_resolver;
 	}
 
 	public function hooks(): void {
@@ -116,6 +121,7 @@ class ExtendStoreApi implements HookProvider {
 
 		$money_formatter      = woocommerce_store_api_get_formatter( 'money' );
 		$currency_formatter   = woocommerce_store_api_get_formatter( 'currency' );
+		$html_formatter       = woocommerce_store_api_get_formatter( 'html' );
 		$future_subscriptions = [];
 
 		foreach ( $this->candidates as $candidate ) {
@@ -141,6 +147,12 @@ class ExtendStoreApi implements HookProvider {
 						'total_tax'          => $money_formatter->format( $candidate->get_total_tax() ),
 						'tax_lines'          => $this->get_tax_lines( $candidate->get_cart() ),
 					]
+				),
+				'shipping_rates'               => $this->get_shipping_packages(
+					$candidate,
+					$money_formatter,
+					$currency_formatter,
+					$html_formatter
 				),
 			];
 		}
@@ -176,6 +188,24 @@ class ExtendStoreApi implements HookProvider {
 							'readonly'    => true,
 						],
 						'totals'                       => [ 'type' => 'object' ],
+						'shipping_rates'               => [
+							'description' => __( 'Recurring shipping packages with rates.', 'flexible-subscriptions' ),
+							'type'        => 'array',
+							'readonly'    => true,
+							'items'       => [
+								'type'       => 'object',
+								'properties' => [
+									'package_id'          => [ 'type' => [ 'string', 'integer' ] ],
+									'name'                => [ 'type' => 'string' ],
+									'destination'         => [ 'type' => 'object' ],
+									'items'               => [ 'type' => 'array' ],
+									'package_details'     => [ 'type' => 'string' ],
+									'needs_shipping'      => [ 'type' => 'boolean' ],
+									'match_initial_rates' => [ 'type' => 'boolean' ],
+									'shipping_rates'      => [ 'type' => 'array' ],
+								],
+							],
+						],
 					],
 				],
 			],
@@ -203,5 +233,129 @@ class ExtendStoreApi implements HookProvider {
 			];
 		}
 		return $tax_lines;
+	}
+
+	/**
+	 * @param \WPDesk\FlexibleSubscriptions\Cart\SubscriptionCandidate $candidate
+	 * @param object $money_formatter
+	 * @param object $currency_formatter
+	 * @param object $html_formatter
+	 * @return array
+	 */
+	private function get_shipping_packages( SubscriptionCandidate $candidate, $money_formatter, $currency_formatter, $html_formatter ): array {
+		$packages = [];
+
+		foreach ( $this->shipping_resolver->resolve( $candidate ) as $package_data ) {
+			$package     = $package_data->get_package();
+			$package_key = $package_data->get_package_key();
+
+			$packages[] = [
+				'package_id'          => $package['package_id'] ?? $package_key,
+				'name'                => $html_formatter->format( $package['package_name'] ?? '' ),
+				'destination'         => $this->get_package_destination( $package, $html_formatter ),
+				'items'               => $this->get_package_items( $package ),
+				'package_details'     => $html_formatter->format( $package_data->get_package_details() ),
+				'needs_shipping'      => ! empty( $package['contents'] ),
+				'match_initial_rates' => $package_data->match_initial_rates(),
+				'shipping_rates'      => $this->get_package_shipping_rates(
+					$package_data->get_rates(),
+					$package_data->get_selected_method(),
+					$money_formatter,
+					$currency_formatter,
+					$html_formatter
+				),
+			];
+		}
+
+		return $packages;
+	}
+
+	/**
+	 * @param array $package
+	 * @param object $html_formatter
+	 * @return object
+	 */
+	private function get_package_destination( array $package, $html_formatter ): object {
+		$destination = $package['destination'] ?? [];
+		$address     = $destination['address_1'] ?? ( $destination['address'] ?? '' );
+
+		return (object) $html_formatter->format(
+			[
+				'address_1' => $address,
+				'address_2' => $destination['address_2'] ?? '',
+				'city'      => $destination['city'] ?? '',
+				'state'     => $destination['state'] ?? '',
+				'postcode'  => $destination['postcode'] ?? '',
+				'country'   => $destination['country'] ?? '',
+			]
+		);
+	}
+
+	/**
+	 * @param array $package
+	 * @return array
+	 */
+	private function get_package_items( array $package ): array {
+		$items = [];
+		foreach ( $package['contents'] ?? [] as $values ) {
+			$items[] = [
+				'key'      => $values['key'] ?? '',
+				'name'     => $values['data']->get_name(),
+				'quantity' => $values['quantity'],
+			];
+		}
+
+		return $items;
+	}
+
+	/**
+	 * @param array<string, \WC_Shipping_Rate> $rates
+	 * @param string $selected_method
+	 * @param object $money_formatter
+	 * @param object $currency_formatter
+	 * @param object $html_formatter
+	 * @return array
+	 */
+	private function get_package_shipping_rates( array $rates, string $selected_method, $money_formatter, $currency_formatter, $html_formatter ): array {
+		$response = [];
+
+		foreach ( $rates as $rate ) {
+			$rate_data = [
+				'rate_id'       => $rate->get_id(),
+				'name'          => $html_formatter->format( $rate->get_label() ),
+				'description'   => $html_formatter->format( $rate->get_description() ),
+				'delivery_time' => $html_formatter->format( $rate->get_delivery_time() ),
+				'price'         => $money_formatter->format( $rate->get_cost() ),
+				'taxes'         => $money_formatter->format( array_sum( (array) $rate->get_taxes() ) ),
+				'method_id'     => $rate->get_method_id(),
+				'instance_id'   => $rate->get_instance_id(),
+				'meta_data'     => $this->get_rate_meta_data( $rate ),
+				'selected'      => $selected_method === $rate->get_id(),
+			];
+
+			$response[] = $currency_formatter->format( $rate_data );
+		}
+
+		return $response;
+	}
+
+	/**
+	 * @param \WC_Shipping_Rate $rate
+	 * @return array
+	 */
+	private function get_rate_meta_data( \WC_Shipping_Rate $rate ): array {
+		$meta_data = $rate->get_meta_data();
+
+		return array_reduce(
+			array_keys( $meta_data ),
+			function ( array $return, $key ) use ( $meta_data ): array {
+				$return[] = [
+					'key'   => $key,
+					'value' => $meta_data[ $key ],
+				];
+				return $return;
+			},
+			[]
+		);
 	}
 }

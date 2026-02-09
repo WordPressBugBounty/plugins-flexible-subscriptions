@@ -25,11 +25,19 @@ final class AutorecoverOnHoldSubscriptions implements HookProvider {
 	}
 
 	public function hooks(): void {
-		if ( function_exists( 'as_next_scheduled_action' ) && false === as_next_scheduled_action( 'fsub/subscription/autorecover_on_hold_subscriptions' ) ) {
-			as_schedule_recurring_action( (int) strtotime( 'midnight tonight' ), \DAY_IN_SECONDS, 'fsub/subscription/autorecover_on_hold_subscriptions' );
+		if ( did_action( 'action_sheduler_init' ) ) {
+			$this->hook_schedule();
+		} else {
+			add_action( 'action_sheduler_init', [ $this, 'hook_schedule' ] );
 		}
 
 		add_action( 'fsub/subscription/autorecover_on_hold_subscriptions', $this );
+	}
+
+	public function hook_schedule(): void {
+		if ( false === as_next_scheduled_action( 'fsub/subscription/autorecover_on_hold_subscriptions' ) ) {
+			as_schedule_recurring_action( (int) strtotime( 'midnight tonight' ), \DAY_IN_SECONDS, 'fsub/subscription/autorecover_on_hold_subscriptions' );
+		}
 	}
 
 	public function __invoke(): void {

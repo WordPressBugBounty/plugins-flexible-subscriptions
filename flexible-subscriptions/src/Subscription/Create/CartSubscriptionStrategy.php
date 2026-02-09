@@ -5,13 +5,17 @@ namespace WPDesk\FlexibleSubscriptions\Subscription\Create;
 use WPDesk\FlexibleSubscriptions\Cart\SubscriptionCandidate;
 use WPDesk\FlexibleSubscriptions\Subscription\Subscription;
 use WPDesk\FlexibleSubscriptions\PaymentMethodSeeker;
+use WPDesk\FlexibleSubscriptions\Utils\CartContext;
 
 class CartSubscriptionStrategy implements SubscriptionCreationStrategy {
 
 	private SubscriptionCandidate $candidate;
 
-	public function __construct( SubscriptionCandidate $candidate ) {
-		$this->candidate = $candidate;
+	private CartContext $cart_context;
+
+	public function __construct( SubscriptionCandidate $candidate, CartContext $cart_context ) {
+		$this->candidate    = $candidate;
+		$this->cart_context = $cart_context;
 	}
 
 	public function apply_totals( Subscription $subscription ): void {
@@ -55,16 +59,22 @@ class CartSubscriptionStrategy implements SubscriptionCreationStrategy {
 			$subscription->set_shipping_total( $this->candidate->get_cart()->get_shipping_total() );
 			$subscription->set_shipping_tax( $this->candidate->get_cart()->get_shipping_tax() );
 
-			foreach ( $this->candidate->get_shipping_packages() as $recurring_cart_package_key => $recurring_cart_package ) {
-				$package_index      = $recurring_cart_package['package_index'] ?? 0;
-				$package            = \WC()->shipping()->calculate_shipping_for_package( $recurring_cart_package );
-				$shipping_method_id = \WC()->checkout()->shipping_methods[ $package_index ] ?? '';
+			foreach ( $this->candidate->get_shipping_packages() as $package_key => $recurring_cart_package ) {
+				$package            = $this->cart_context->temporarily_promote_to_global(
+					$this->candidate->get_cart(),
+					static function () use ( $recurring_cart_package, $package_key ) {
+						return \WC()->shipping()->calculate_shipping_for_package( $recurring_cart_package, $package_key );
+					}
+				);
+				$shipping_method_id = $this->candidate->get_shipping_method( $package_key ) ?? '';
 
-				if ( isset( \WC()->checkout()->shipping_methods[ $recurring_cart_package_key ] ) ) {
-					$shipping_method_id = \WC()->checkout()->shipping_methods[ $recurring_cart_package_key ];
-					$package_key        = $recurring_cart_package_key;
-				} else {
-					$package_key = $package_index;
+				if ( empty( $shipping_method_id ) ) {
+					$shipping_method_id = \WC()->checkout()->shipping_methods[ $package_key ] ?? '';
+				}
+
+				if ( empty( $shipping_method_id ) && ! empty( $package['rates'] ) ) {
+					$first_rate         = reset( $package['rates'] );
+					$shipping_method_id = $first_rate ? $first_rate->id : '';
 				}
 
 				if ( isset( $package['rates'][ $shipping_method_id ] ) ) {

@@ -34,11 +34,7 @@ final class ChangeAddButtonText implements HookProvider {
 			return $button_text;
 		}
 
-		if ( $this->settings->has( 'place_order_label' ) ) {
-			return $this->settings->get( 'place_order_label' );
-		} else {
-			return __( 'Sign up now', 'flexible-subscriptions' );
-		}
+		return $this->settings->get( 'place_order_label', __( 'Sign up now', 'flexible-subscriptions' ) );
 	}
 
 	public function product_add_to_cart_text( $button_text, $product ) {

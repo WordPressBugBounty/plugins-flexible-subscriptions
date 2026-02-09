@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace WPDesk\FlexibleSubscriptions\Product;
 
 use WPDesk\FlexibleSubscriptions\Formatting\Price\ProductFullPrice;
+use WPDesk\FlexibleSubscriptions\Subscription\Model\SubscriptionPlan;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Interval\SingleUnitSpec;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Interval\WPInterval;
 
@@ -28,6 +29,8 @@ class SubscriptionProductWrapper {
 	/** @var (SubscriptionProduct&\WC_Product) $product */
 	private $product;
 
+	private ?SubscriptionPlan $plan = null;
+
 	/**
 	 * @param (SubscriptionProduct&\WC_Product) $product Actually, we cannot typehint it, because subscription product wrapper MUST be compatible with any product. There are cases, when we don't know product type yet, but we need to wrap it.
 	 */
@@ -37,6 +40,14 @@ class SubscriptionProductWrapper {
 		}
 
 		$this->product = $product;
+	}
+
+	public function get_plan(): SubscriptionPlan {
+		return $this->plan ??= new SubscriptionPlan(
+			$this->get_billing_frequency(),
+			$this->get_trial_duration(),
+			$this->get_expiration()
+		);
 	}
 
 	/**
@@ -68,7 +79,7 @@ class SubscriptionProductWrapper {
 	public function add_to_cart_text(): string {
 		return apply_filters(
 			'fsub/product_add_to_cart_text',
-			esc_html__( 'Sign up now', 'flexible-subscriptions' ),
+			$this->product->is_type( 'variable' ) ? esc_html__( 'Select options', 'flexible-subscriptions' ) : esc_html__( 'Sign up now', 'flexible-subscriptions' ),
 			$this->product
 		);
 	}
