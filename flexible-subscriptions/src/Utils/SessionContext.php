@@ -4,14 +4,18 @@ namespace WPDesk\FlexibleSubscriptions\Utils;
 
 class SessionContext {
 
-	private array $shipping_methods;
+	private array $shipping_methods = [];
 
 	public function forge_session(): void {
-		if ( isset( $this->shipping_methods ) ) {
+		if ( ! empty( $this->shipping_methods ) ) {
 			throw new \RuntimeException( 'Shipping methods already set in session.' );
 		}
 
-		$this->shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+		if ( WC()->session === null ) {
+			return;
+		}
+
+		$this->shipping_methods = (array) ( WC()->session->get( 'chosen_shipping_methods' ) ?? [] );
 	}
 
 	public function get_shipping_methods() {
@@ -22,11 +26,17 @@ class SessionContext {
 		if ( empty( $this->shipping_methods ) ) {
 			return;
 		}
+		if ( WC()->session === null ) {
+			return;
+		}
 		WC()->session->set( 'chosen_shipping_methods', $this->shipping_methods );
 	}
 
 	public function flush(): void {
+		if ( WC()->session === null ) {
+			return;
+		}
 		WC()->session->set( 'chosen_shipping_methods', $this->shipping_methods );
-		unset( $this->shipping_methods );
+		$this->shipping_methods = [];
 	}
 }
