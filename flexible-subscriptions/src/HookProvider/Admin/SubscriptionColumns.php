@@ -8,9 +8,8 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
 use WPDesk\FlexibleSubscriptions\Formatting\Price\PriceFormat;
 use WPDesk\FlexibleSubscriptions\Subscription\Payment\PaymentRequestFinder;
 use WPDesk\FlexibleSubscriptions\Subscription\Subscription;
-use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionLifecycleManager;
-use WPDesk\FlexibleSubscriptions\Subscription\Utils\Status;
 use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionFinder;
+use WPDesk\FlexibleSubscriptions\Subscription\Utils\Status;
 use WPDesk\FlexibleSubscriptions\Utils\HookProvider;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Format\Date\HumanFriendlyFormat;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Format\Date\Iso8601Format;
@@ -28,18 +27,14 @@ class SubscriptionColumns implements HookProvider {
 	/** @var PaymentRequestFinder */
 	private $payment_request_finder;
 
-	private SubscriptionLifecycleManager $lifecycle;
-
 	public function __construct(
 		SubscriptionFinder $subscription_finder,
 		PaymentRequestFinder $payment_request_finder,
-		SubscriptionLifecycleManager $lifecycle,
 		Renderer $renderer
 	) {
 		$this->subscription_finder    = $subscription_finder;
 		$this->renderer               = $renderer;
 		$this->payment_request_finder = $payment_request_finder;
-		$this->lifecycle              = $lifecycle;
 	}
 
 	public function hooks(): void {
@@ -232,7 +227,7 @@ class SubscriptionColumns implements HookProvider {
 
 		foreach ( $all_statuses as $status => $label ) {
 
-			if ( $status === 'deleted' || $this->lifecycle->can_transition( $the_subscription, $status ) ) {
+			if ( $status === 'deleted' || $the_subscription->can_be_updated_to( $status ) ) {
 
 				if ( in_array( $status, [ 'trash', 'deleted' ], true ) ) {
 

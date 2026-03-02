@@ -4,25 +4,26 @@ declare(strict_types=1);
 
 namespace WPDesk\FlexibleSubscriptions\HookProvider\Account;
 
+use WPDesk\FlexibleSubscriptions\Subscription\Lifecycle\LifecycleOrchestrator;
 use WPDesk\FlexibleSubscriptions\Subscription\Subscription;
-use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionFinder;
-use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionLifecycleManager;
+use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionRepository;
 use WPDesk\FlexibleSubscriptions\Subscription\TransitionContext;
 use WPDesk\FlexibleSubscriptions\Utils\HookProvider;
+use WPDesk\FlexibleSubscriptions\Vendor\Psr\Clock\ClockInterface;
 use WPDesk\FlexibleSubscriptions\Vendor\Psr\Log\LoggerInterface;
 
 class CustomerActionsController implements HookProvider {
 
-	private SubscriptionFinder $finder;
+	private SubscriptionRepository $repository;
 
-	private SubscriptionLifecycleManager $lifecycle;
+	private ClockInterface $clock;
 
 	private LoggerInterface $logger;
 
-	public function __construct( SubscriptionFinder $finder, SubscriptionLifecycleManager $lifecycle, LoggerInterface $logger ) {
-		$this->finder    = $finder;
-		$this->lifecycle = $lifecycle;
-		$this->logger    = $logger;
+	public function __construct( SubscriptionRepository $repository, ClockInterface $clock, LoggerInterface $logger ) {
+		$this->repository = $repository;
+		$this->clock      = $clock;
+		$this->logger     = $logger;
 	}
 
 	public function hooks(): void {
@@ -41,7 +42,7 @@ class CustomerActionsController implements HookProvider {
 
 		$this->logger->debug( 'Initiaing user subscription cancellation...' );
 
-		$subscription = $this->finder->find( absint( $_GET['id'] ) );
+		$subscription = $this->repository->find( absint( $_GET['id'] ) );
 
 		if ( ! $subscription instanceof Subscription ) {
 			$this->logger->debug( 'Cannot cancel subscription as subscription "{sid}" not found.', [ 'sid' => absint( $_GET['id'] ) ] );
@@ -53,8 +54,7 @@ class CustomerActionsController implements HookProvider {
 			$this->logger->debug(
 				'Subscription "{sid}" belongs to another user.',
 				[
-					'sid'          => $subscription->get_id(),
-					'subscription' => (string) $subscription,
+					'sid' => $subscription->get_id(),
 				]
 			);
 			wp_safe_redirect( wp_get_referer() );
@@ -64,14 +64,13 @@ class CustomerActionsController implements HookProvider {
 		$this->logger->debug(
 			'Cancelling subscription "{sid}" on user request.',
 			[
-				'sid'          => $subscription->get_id(),
-				'subscription' => (string) $subscription,
+				'sid' => $subscription->get_id(),
 			]
 		);
 
-		$this->lifecycle->transition( $subscription, 'pending-cancel', TransitionContext::manual( 'customer_cancel' ) );
-
+		$subscription->cancel( $this->clock->now(), TransitionContext::manual( 'customer_cancel' ) );
 		$subscription->add_order_note( __( 'Subscription cancelled by customer.', 'flexible-subscriptions' ), 0, true );
+		$this->repository->save( $subscription );
 
 		$this->logger->debug( 'Subscription cancelled succesfully. Redirecting to subscription\'s page.' );
 

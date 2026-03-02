@@ -13,7 +13,7 @@ use WPDesk\FlexibleSubscriptions\Subscription\Utils\Status;
 use WPDesk\FlexibleSubscriptions\Utils\HookProvider;
 
 /**
- * Whenever admin saves subscription metaboxes with update action, we
+ * Whenever admin saves subscription metaboxes with an update action, we
  * want to save additional available subscription data.
  */
 class AdminSubscriptionUpdate implements HookProvider {

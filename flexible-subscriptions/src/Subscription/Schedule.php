@@ -4,17 +4,21 @@ declare(strict_types=1);
 
 namespace WPDesk\FlexibleSubscriptions\Subscription;
 
+use WPDesk\FlexibleSubscriptions\Vendor\Psr\Clock\ClockInterface;
 use WPDesk\FlexibleSubscriptions\Vendor\Psr\Log\LoggerInterface;
 
 class Schedule {
 
 	private LoggerInterface $logger;
 
-	public function __construct( LoggerInterface $logger ) {
+	private ClockInterface $clock;
+
+	public function __construct( ClockInterface $clock, LoggerInterface $logger ) {
 		$this->logger = $logger;
+		$this->clock  = $clock;
 	}
 
-	public function schedule_payment_request( Subscription $subscription ): ?SchedulePaymentRequestDecision {
+	public function schedule_payment_request( Subscription $subscription ): void {
 		if ( $this->is_scheduled_payment_request( $subscription ) ) {
 			$this->logger->debug( sprintf( 'Subscription #%d is already scheduled for payment request, unscheduling...', $subscription->get_id() ) );
 			as_unschedule_action(
@@ -26,54 +30,59 @@ class Schedule {
 			);
 		}
 
+		if ( ! $subscription->is_active() ) {
+			$this->logger->debug(
+				'Aborting payment schedule for subscription #{id} because subscription is not active.',
+				[
+					'id'             => $subscription->get_id(),
+					'current_status' => $subscription->get_status(),
+				]
+			);
+			return;
+		}
+
 		if ( $subscription->is_expired() ) {
 			$this->logger->debug( sprintf( 'Subscription #%d is already expired, not scheduling payment request.', $subscription->get_id() ) );
-			return new SchedulePaymentRequestDecision( SchedulePaymentRequestDecision::TRANSITION_EXPIRED );
+			return;
 		}
 
 		$period = $subscription->get_current_period();
 
 		if ( ! $period->getEndDate() instanceof \DateTimeInterface ) {
 			$this->logger->warning( sprintf( 'Subscription period is missing end date for subscription #%d. Cannot schedule payment request.', $subscription->get_id() ) );
-			return null;
+			return;
 		}
 
-		$now = new \DateTimeImmutable( 'now', new \DateTimeZone( 'UTC' ) );
-		if ( $period->getEndDate() <= $now ) {
+		if ( $period->getEndDate() <= $this->clock->now() ) {
 			$this->logger->warning(
 				'Aborting payment schedule for subscription #{id} because next payment date is in the past: "{stamp}".',
 				[
-					'id'           => $subscription->get_id(),
-					'subscription' => (string) $subscription,
-					'stamp'        => $period->getEndDate()->format( 'c' ),
-					'period'       => $period,
+					'id'             => $subscription->get_id(),
+					'stamp'          => $period->getEndDate()->format( 'c' ),
+					'current_status' => $subscription->get_status(),
 				]
 			);
-			return null;
+			return;
 		}
 
 		// Safeguard against zero-interval scheduling.
 		if ( $subscription->get_billing_frequency()->isEmpty() ) {
-			$this->logger->critical(
-				'Aborting payment schedule for subscription #{id} due to a zero-length billing interval. The subscription has been put on hold to prevent repeated charges.',
+			$this->logger->warning(
+				'Aborting payment schedule for subscription #{id} due to a zero-length billing interval.',
 				[
-					'id'           => $subscription->get_id(),
-					'subscription' => (string) $subscription,
+					'id'             => $subscription->get_id(),
+					'current_status' => $subscription->get_status(),
 				]
 			);
-			return new SchedulePaymentRequestDecision(
-				SchedulePaymentRequestDecision::TRANSITION_ON_HOLD,
-				__( 'Subscription put on hold by the system due to a configuration error (zero-length billing interval). Please check the subscription settings.', 'flexible-subscriptions' )
-			);
+			return;
 		}
 
 		$this->logger->debug(
 			'Scheduling payment request for subscription #{id} at "{stamp}"...',
 			[
-				'id'           => $subscription->get_id(),
-				'subscription' => (string) $subscription,
-				'stamp'        => $period->getEndDate()->format( 'c' ),
-				'period'       => $period,
+				'id'             => $subscription->get_id(),
+				'stamp'          => $period->getEndDate()->format( 'c' ),
+				'current_status' => $subscription->get_status(),
 			]
 		);
 
@@ -88,25 +97,33 @@ class Schedule {
 			$this->logger->debug(
 				'Succesfully scheduled payment request for subscription #{id}',
 				[
-					'id'     => $subscription->get_id(),
-					'period' => $period,
+					'id'    => $subscription->get_id(),
+					'stamp' => $period->getEndDate()->format( 'c' ),
 				]
 			);
 		} else {
 			$this->logger->warning(
 				'Failed to schedule payment request for subscription #{id}',
 				[
-					'id'     => $subscription->get_id(),
-					'period' => $period,
+					'id'    => $subscription->get_id(),
+					'stamp' => $period->getEndDate()->format( 'c' ),
 				]
 			);
 		}
-
-		return null;
 	}
 
 	public function is_scheduled_payment_request( Subscription $subscription ): bool {
 		return as_has_scheduled_action(
+			'fsub/subscription/payment_request/process',
+			[
+				'subscription' => $subscription->get_id(),
+			],
+			'fsb-payment-request'
+		);
+	}
+
+	public function remove_payment_request( Subscription $subscription ): void {
+		as_unschedule_all_actions(
 			'fsub/subscription/payment_request/process',
 			[
 				'subscription' => $subscription->get_id(),

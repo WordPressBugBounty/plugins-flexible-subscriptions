@@ -1,12 +1,11 @@
 <?php
 
 /**
- * @var Subscription $subscription
- * @var \WPDesk\FlexibleSubscriptions\Subscription\SubscriptionLifecycleManager $lifecycle
- * @var array<string, mixed> $billing_fields
- * @var array<string, mixed> $shipping_fields
- * @var array<string, mixed> $payment_methods
- * @var array<string, array<string, mixed>> $payment_meta_fields
+ * @var Subscription                                                               $subscription
+ * @var array<string, mixed>                                                       $billing_fields
+ * @var array<string, mixed>                                                       $shipping_fields
+ * @var array<string, mixed>                                                       $payment_methods
+ * @var array<string, array<string, mixed>>                                        $payment_meta_fields
  */
 
 use WPDesk\FlexibleSubscriptions\Subscription\Subscription;
@@ -96,7 +95,7 @@ $subscription_title = $subscription->get_data_store()->get_title( $subscription 
 						$selected_status    = $is_current_valid ? $normalized_status : Status::PENDING;
 
 						foreach ( $available_statuses as $status => $status_name ) {
-							if ( ! $is_current_valid || $lifecycle->can_transition( $subscription, $status ) || $subscription->has_status( $status ) ) {
+							if ( ! $is_current_valid || $subscription->can_be_updated_to( $status ) || $subscription->has_status( $status ) ) {
 								echo '<option value="' . esc_attr( $status ) . '" ' . selected( $status, $selected_status, false ) . '>' . esc_html( $status_name ) . '</option>';
 							}
 						}
@@ -211,19 +210,6 @@ $subscription_title = $subscription->get_data_store()->get_title( $subscription 
 				}
 
 				echo '</div>';
-
-				if ( ! empty( $payment_meta_fields[ $subscription->get_payment_method() ]['post_meta'] ) ) {
-					echo '<div class="payment-meta-fields">';
-					foreach ( $payment_meta_fields[ $subscription->get_payment_method() ]['post_meta'] as $meta_key => $meta ) {
-						?>
-						<p class="form-field form-field-wide">
-							<label for="<?php echo esc_attr( $meta_key ); ?>"><?php echo esc_html( $meta['label'] ); ?>:</label>
-							<input type="text" class="short" name="<?php echo esc_attr( $meta_key ); ?>" id="<?php echo esc_attr( $meta_key ); ?>" value="<?php echo esc_attr( $meta['value'] ); ?>" />
-						</p>
-						<?php
-					}
-					echo '</div>';
-				}
 
 				do_action( 'woocommerce_admin_order_data_after_billing_address', $subscription );
 

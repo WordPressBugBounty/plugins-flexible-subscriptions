@@ -49,7 +49,12 @@ class SubscriptionCreator {
 		$subscription->set_trial_end_date( $candidate->get_trial_end_date() );
 		$subscription->set_expiration( $candidate->get_expiration() );
 
-		$subscription->recalculate_periods();
+		$subscription->initialize_first_period(
+			$candidate->get_start_date(),
+			$candidate->get_billing_frequency(),
+			$candidate->get_trial_end_date(),
+			$candidate->get_expiration()
+		);
 
 		$subscription->set_manual(
 			$candidate_strategy->requires_manual_renewal(

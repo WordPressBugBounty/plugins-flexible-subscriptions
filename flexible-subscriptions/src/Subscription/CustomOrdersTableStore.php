@@ -354,9 +354,12 @@ class CustomOrdersTableStore extends OrdersTableDataStore {
 		foreach ( $props_to_save as $meta_key => $prop ) {
 			$meta_value = $subscription->{"get_$prop"}( 'edit' );
 
-			if ( $meta_value instanceof \DateTimeInterface ) {
+			if ( $meta_value instanceof \DateTimeImmutable ) {
 				$meta_value = $meta_value->setTimezone( new \DateTimeZone( 'UTC' ) );
 				$meta_value = $meta_value->format( 'Y-m-d H:i:s' );
+			} elseif ( $meta_value instanceof \DateTimeInterface ) {
+				$meta_value = new \DateTimeImmutable( $meta_value->format( 'Y-m-d H:i:s' ), $meta_value->getTimezone() );
+				$meta_value = $meta_value->setTimezone( new \DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
 			}
 
 			if ( $meta_value instanceof WPInterval ) {
@@ -376,6 +379,36 @@ class CustomOrdersTableStore extends OrdersTableDataStore {
 				$this->data_store_meta->update_meta( $subscription, (object) $new_meta_data );
 			}
 		}
+	}
+
+	/**
+	 * Gets a list of props and meta keys that need updated based on change state
+	 * or if they are present in the database or not.
+	 *
+	 * @param  \WC_Abstract_Order $object            The WP_Data object.
+	 * @param  array<string, string> $meta_key_to_props A mapping of meta keys => prop names.
+	 * @param  string             $meta_type         The internal WP meta type (post, user, etc).
+	 * @return array<string, string>                                 A mapping of meta keys => prop names, filtered by ones that should be updated.
+	 */
+	// @phpstan-ignore method.childReturnType
+	protected function get_props_to_update( $object, $meta_key_to_props, $meta_type = 'post' ) {
+		$props_to_update = [];
+		$changed_props   = $object->get_changes();
+
+		foreach ( $meta_key_to_props as $meta_key => $prop ) {
+			if ( str_ends_with( $meta_key, '_utc' ) ) {
+				if ( array_key_exists( $prop . '_utc', $changed_props ) || array_key_exists( $prop, $changed_props ) ) {
+					$props_to_update[ $meta_key ] = $prop;
+					continue;
+				}
+			}
+
+			if ( array_key_exists( $prop, $changed_props ) || ! metadata_exists( $meta_type, $object->get_id(), $meta_key ) ) {
+				$props_to_update[ $meta_key ] = $prop;
+			}
+		}
+
+		return $props_to_update;
 	}
 
 	/**

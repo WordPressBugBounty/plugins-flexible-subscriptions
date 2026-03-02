@@ -6,7 +6,6 @@ namespace WPDesk\FlexibleSubscriptions\HookProvider\Admin\Subscription;
 use WPDesk\FlexibleSubscriptions\PaymentMethodSeeker;
 use WPDesk\FlexibleSubscriptions\Subscription\Subscription;
 use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionFinder;
-use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionLifecycleManager;
 use WPDesk\FlexibleSubscriptions\Utils\HookProvider;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\View\Renderer\Renderer;
 
@@ -21,17 +20,13 @@ class SubscriptionDataMetaBox extends \WC_Meta_Box_Order_Data implements HookPro
 	/** @var Renderer */
 	private $renderer;
 
-	private SubscriptionLifecycleManager $lifecycle;
-
 	public function __construct(
 		SubscriptionFinder $finder,
 		PaymentMethodSeeker $payment_method_seeker,
-		SubscriptionLifecycleManager $lifecycle,
 		Renderer $renderer
 	) {
 		$this->finder                = $finder;
 		$this->payment_method_seeker = $payment_method_seeker;
-		$this->lifecycle             = $lifecycle;
 		$this->renderer              = $renderer;
 	}
 
@@ -74,25 +69,13 @@ class SubscriptionDataMetaBox extends \WC_Meta_Box_Order_Data implements HookPro
 
 		self::init_address_fields();
 
-		/**
-		 * Filters the payment meta fields for a Flexible Subscriptions subscription.
-		 *
-		 * @since 1.6.0
-		 *
-		 * @param array<string,array<string,mixed>> $payment_meta_fields
-		 * @param Subscription $subscription        The subscription object.
-		 */
-		$payment_meta_fields = apply_filters( 'fsub/subscription/payment_meta', [], $subscription );
-
 		$this->renderer->output_render(
 			'subscription/metabox/details',
 			[
 				'subscription'        => $subscription,
-				'lifecycle'           => $this->lifecycle,
 				'billing_fields'      => self::$billing_fields,
 				'shipping_fields'     => self::$shipping_fields,
 				'payment_methods'     => $this->find_payment_methods( $subscription ),
-				'payment_meta_fields' => (array) $payment_meta_fields,
 			]
 		);
 	}

@@ -3,10 +3,13 @@ declare(strict_types=1);
 
 namespace WPDesk\FlexibleSubscriptions\HookProvider\Subscription;
 
-use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionFinder;
-use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionLifecycleManager;
+use WC_Order;
+use WPDesk\FlexibleSubscriptions\Subscription\Lifecycle\LifecycleOrchestrator;
+use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionRepository;
 use WPDesk\FlexibleSubscriptions\Subscription\TransitionContext;
 use WPDesk\FlexibleSubscriptions\Utils\HookProvider;
+use WPDesk\FlexibleSubscriptions\Vendor\Psr\Clock\ClockInterface;
+use const DAY_IN_SECONDS;
 
 /**
  * Sometimes, subscription may stuck in on-hold status, even despite the fact that the payment
@@ -15,20 +18,20 @@ use WPDesk\FlexibleSubscriptions\Utils\HookProvider;
  */
 final class AutorecoverOnHoldSubscriptions implements HookProvider {
 
-	private SubscriptionFinder $finder;
+	private SubscriptionRepository $repository;
 
-	private SubscriptionLifecycleManager $lifecycle;
+	private ClockInterface $clock;
 
-	public function __construct( SubscriptionFinder $finder, SubscriptionLifecycleManager $lifecycle ) {
-		$this->finder    = $finder;
-		$this->lifecycle = $lifecycle;
+	public function __construct( SubscriptionRepository $repository, ClockInterface $clock ) {
+		$this->repository = $repository;
+		$this->clock      = $clock;
 	}
 
 	public function hooks(): void {
-		if ( did_action( 'action_sheduler_init' ) ) {
+		if ( did_action( 'action_scheduler_init' ) ) {
 			$this->hook_schedule();
 		} else {
-			add_action( 'action_sheduler_init', [ $this, 'hook_schedule' ] );
+			add_action( 'action_scheduler_init', [ $this, 'hook_schedule' ] );
 		}
 
 		add_action( 'fsub/subscription/autorecover_on_hold_subscriptions', $this );
@@ -36,12 +39,12 @@ final class AutorecoverOnHoldSubscriptions implements HookProvider {
 
 	public function hook_schedule(): void {
 		if ( false === as_next_scheduled_action( 'fsub/subscription/autorecover_on_hold_subscriptions' ) ) {
-			as_schedule_recurring_action( (int) strtotime( 'midnight tonight' ), \DAY_IN_SECONDS, 'fsub/subscription/autorecover_on_hold_subscriptions' );
+			as_schedule_recurring_action( (int) strtotime( 'midnight tonight' ), DAY_IN_SECONDS, 'fsub/subscription/autorecover_on_hold_subscriptions' );
 		}
 	}
 
 	public function __invoke(): void {
-		$subscriptions = $this->finder->find_all_by(
+		$subscriptions = $this->repository->find_all_by(
 			[
 				'status'     => 'on-hold',
 				'meta_query' => [
@@ -62,13 +65,14 @@ final class AutorecoverOnHoldSubscriptions implements HookProvider {
 
 			$payment_request = wc_get_order( $last_payment_request_id );
 
-			if ( ! $payment_request instanceof \WC_Order ) {
+			if ( ! $payment_request instanceof WC_Order ) {
 				continue;
 			}
 
 			if ( $payment_request->is_paid() ) {
-				$this->lifecycle->transition( $subscription, 'active', TransitionContext::system( 'autorecover_on_hold' ) );
+				$subscription->reactivate( TransitionContext::system( 'autorecover_on_hold' ) );
 				$subscription->add_order_note( __( 'Subscription reactivated because the last payment request was successful.', 'flexible-subscriptions' ) );
+				$this->repository->save( $subscription );
 			}
 		}
 	}

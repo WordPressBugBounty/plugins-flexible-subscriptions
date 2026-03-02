@@ -38,10 +38,11 @@
 	},
 	"require-dev": {
 		"brain/monkey": "^2",
-		"wpdesk/php-di": "^6.3",
 		"phpunit/phpunit": "<10",
+		"psr/event-dispatcher": "^1.0",
 		"woocommerce/action-scheduler": "*",
 		"wpdesk/order-data-transfer": "^1.0",
+		"wpdesk/php-di": "^6.3",
 		"wpdesk/phpstan-rules": "^1.1",
 		"wpdesk/wp-basic-requirements": "^3.6",
 		"wpdesk/wp-clock": "^1.0",
@@ -83,6 +84,6 @@
 			"url": "https://gitlab.wpdesk.dev/api/v4/group/wpdesk/-/packages/composer/"
 		}
 	},
-	"version": "1.7.5",
+	"version": "1.7.6",
 	"type": "wordpress-plugin"
 }

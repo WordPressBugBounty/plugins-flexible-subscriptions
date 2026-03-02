@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace WPDesk\FlexibleSubscriptions\Subscription;
 
+use WPDesk\FlexibleSubscriptions\Subscription\Renewal\Renewal;
+
+/**
+ * @deprecated 1.7.6 Use {@see SubscriptionRepository} instead.
+ */
 class SubscriptionFinder implements SubscriptionFinderInterface {
 
 	public function find( int $id ): ?Subscription {
@@ -71,11 +76,13 @@ class SubscriptionFinder implements SubscriptionFinderInterface {
 	public function find_by_payment_request( int $payment_request_id ): ?Subscription {
 		$payment_request = wc_get_order( $payment_request_id );
 
-		if ( ! $payment_request instanceof \WC_Order ) {
+		$renewal = Renewal::from_order( $payment_request );
+
+		if ( ! $renewal instanceof Renewal ) {
 			return null;
 		}
 
-		return $this->find( $payment_request->get_parent_id( 'edit' ) );
+		return $this->find( $renewal->get_subscription_id() );
 	}
 
 	public function count_by_customer( int $customer_id ): int {

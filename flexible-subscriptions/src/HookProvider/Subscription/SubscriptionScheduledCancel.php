@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace WPDesk\FlexibleSubscriptions\HookProvider\Subscription;
 
-use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionLifecycleManager;
 use WPDesk\FlexibleSubscriptions\Subscription\Subscription;
-use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionFinder;
+use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionRepository;
 use WPDesk\FlexibleSubscriptions\Subscription\TransitionContext;
 use WPDesk\FlexibleSubscriptions\Utils\HookProvider;
+use WPDesk\FlexibleSubscriptions\Vendor\Psr\Clock\ClockInterface;
 use WPDesk\FlexibleSubscriptions\Vendor\Psr\Log\LoggerInterface;
 
 /**
@@ -19,16 +19,16 @@ use WPDesk\FlexibleSubscriptions\Vendor\Psr\Log\LoggerInterface;
  */
 class SubscriptionScheduledCancel implements HookProvider {
 
-	private SubscriptionFinder $finder;
+	private SubscriptionRepository $repository;
 
-	private SubscriptionLifecycleManager $lifecycle;
+	private ClockInterface $clock;
 
 	private LoggerInterface $logger;
 
-	public function __construct( SubscriptionFinder $finder, SubscriptionLifecycleManager $lifecycle, LoggerInterface $logger ) {
-		$this->finder    = $finder;
-		$this->lifecycle = $lifecycle;
-		$this->logger    = $logger;
+	public function __construct( SubscriptionRepository $repository, ClockInterface $clock, LoggerInterface $logger ) {
+		$this->repository = $repository;
+		$this->clock      = $clock;
+		$this->logger     = $logger;
 	}
 
 	public function hooks(): void {
@@ -38,14 +38,15 @@ class SubscriptionScheduledCancel implements HookProvider {
 	/** @param int $subscription_id */
 	public function __invoke( $subscription_id ): void {
 		$this->logger->debug( 'Cancelling subscription "{sid}" from schedule...', [ 'sid' => $subscription_id ] );
-		$subscription = $this->finder->find( $subscription_id );
+		$subscription = $this->repository->find( $subscription_id );
 
 		if ( ! $subscription instanceof Subscription ) {
 			$this->logger->warning( 'Subscription "{sid}" marked for cancellation not found.', [ 'sid' => $subscription_id ] );
 			return;
 		}
 
-		$this->lifecycle->transition( $subscription, 'cancelled', TransitionContext::system( 'scheduled_cancellation' ) );
+		$subscription->cancel( $this->clock->now(), TransitionContext::system( 'scheduled_cancellation' ) );
+		$this->repository->save( $subscription );
 		$this->logger->debug( 'Subscription "{sid}" cancelled from schedule.', [ 'sid' => $subscription_id ] );
 	}
 }

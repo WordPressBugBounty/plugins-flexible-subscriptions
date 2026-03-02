@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Flexible Subscriptions 1.7.5\n"
+"Project-Id-Version: Flexible Subscriptions 1.7.6\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/flexible-subscriptions\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-02-11T12:55:35+00:00\n"
+"POT-Creation-Date: 2026-03-02T10:52:30+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: flexible-subscriptions\n"
@@ -223,7 +223,7 @@ msgstr ""
 msgid "My Subscription"
 msgstr ""
 
-#: src/HookProvider/Account/CustomerActionsController.php:74
+#: src/HookProvider/Account/CustomerActionsController.php:72
 msgid "Subscription cancelled by customer."
 msgstr ""
 
@@ -364,7 +364,7 @@ msgctxt "meta box title"
 msgid "Payment cycles"
 msgstr ""
 
-#: src/HookProvider/Admin/Subscription/SubscriptionDataMetaBox.php:48
+#: src/HookProvider/Admin/Subscription/SubscriptionDataMetaBox.php:43
 msgctxt "meta box title"
 msgid "Subscription data"
 msgstr ""
@@ -381,7 +381,7 @@ msgstr ""
 msgid "Subscription misconfiguration: The billing frequency for this subscription is not set. This will likely cause errors with subscription functionality. Please edit the subscription and set the billing frequency to resolve this issue."
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:67
+#: src/HookProvider/Admin/SubscriptionColumns.php:62
 #: templates/admin/subscription/metabox/related-orders.php:81
 #: templates/myaccount/my-subscriptions.php:26
 #: templates/myaccount/my-subscriptions.php:40
@@ -393,7 +393,7 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:68
+#: src/HookProvider/Admin/SubscriptionColumns.php:63
 #: src/HookProvider/Product/SubscriptionProductType.php:25
 #: src/HookProvider/SubscriptionOrderType.php:29
 #: templates/myaccount/my-subscriptions.php:25
@@ -401,85 +401,85 @@ msgstr ""
 msgid "Subscription"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:69
+#: src/HookProvider/Admin/SubscriptionColumns.php:64
 msgid "Items"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:70
+#: src/HookProvider/Admin/SubscriptionColumns.php:65
 #: assets/blocks/index.js:161
 #: assets/dist/index.js:10
 msgid "Total"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:71
+#: src/HookProvider/Admin/SubscriptionColumns.php:66
 #: templates/admin/subscription/metabox/schedule.php:54
 msgid "Start Date"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:72
+#: src/HookProvider/Admin/SubscriptionColumns.php:67
 msgid "Trial End"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:73
+#: src/HookProvider/Admin/SubscriptionColumns.php:68
 msgid "Next Payment"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:74
+#: src/HookProvider/Admin/SubscriptionColumns.php:69
 msgid "Last Transaction"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:75
+#: src/HookProvider/Admin/SubscriptionColumns.php:70
 #: templates/admin/subscription/metabox/schedule.php:128
 msgid "End Date"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:76
+#: src/HookProvider/Admin/SubscriptionColumns.php:71
 msgctxt "number of payment requests linked to a subscription"
 msgid "Related orders"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:157
+#: src/HookProvider/Admin/SubscriptionColumns.php:152
 msgid "N/A"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:226
+#: src/HookProvider/Admin/SubscriptionColumns.php:221
 msgid "Reactivate"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:227
+#: src/HookProvider/Admin/SubscriptionColumns.php:222
 msgid "Suspend"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:228
+#: src/HookProvider/Admin/SubscriptionColumns.php:223
 #: templates/myaccount/payment-requests.php:96
 msgctxt "an action on a subscription"
 msgid "Cancel"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:229
-#: src/HookProvider/Admin/SubscriptionColumns.php:245
+#: src/HookProvider/Admin/SubscriptionColumns.php:224
+#: src/HookProvider/Admin/SubscriptionColumns.php:240
 msgid "Trash"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:230
-#: src/HookProvider/Admin/SubscriptionColumns.php:249
+#: src/HookProvider/Admin/SubscriptionColumns.php:225
+#: src/HookProvider/Admin/SubscriptionColumns.php:244
 msgid "Delete Permanently"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:245
+#: src/HookProvider/Admin/SubscriptionColumns.php:240
 msgid "Move this item to the Trash"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:249
+#: src/HookProvider/Admin/SubscriptionColumns.php:244
 msgid "Delete this item permanently"
 msgstr ""
 
-#: src/HookProvider/Admin/SubscriptionColumns.php:255
+#: src/HookProvider/Admin/SubscriptionColumns.php:250
 msgid "Cancel Now"
 msgstr ""
 
 #. translators: placeholder is the display name of a payment gateway a subscription was paid by.
-#: src/HookProvider/Admin/SubscriptionColumns.php:291
+#: src/HookProvider/Admin/SubscriptionColumns.php:286
 #: templates/checkout/recurring-item-totals/shipping/shipping-cost.php:19
 #: assets/blocks/index.js:139
 #: assets/dist/index.js:10
@@ -639,16 +639,11 @@ msgstr ""
 msgid "Start Here"
 msgstr ""
 
-#: src/HookProvider/OrderStatusListener.php:78
-#, php-format
-msgid "Subscription cancelled for refunded order %1$s#%2$s%3$s."
-msgstr ""
-
 #: src/HookProvider/Product/SubscriptionProductType.php:26
 msgid "Variable Subscription"
 msgstr ""
 
-#: src/HookProvider/Subscription/AutorecoverOnHoldSubscriptions.php:71
+#: src/HookProvider/Subscription/AutorecoverOnHoldSubscriptions.php:74
 msgid "Subscription reactivated because the last payment request was successful."
 msgstr ""
 
@@ -714,7 +709,7 @@ msgid "Deactivate WooCommerce Subscriptions"
 msgstr ""
 
 #: src/PaymentMethodSeeker.php:32
-#: src/Subscription/Subscription.php:157
+#: src/Subscription/Subscription.php:592
 msgid "Manual Renewal"
 msgstr ""
 
@@ -763,6 +758,11 @@ msgstr ""
 msgid "Select options"
 msgstr ""
 
+#: src/Subscription/Actions/CancelRefundedSubscriptions.php:42
+#, php-format
+msgid "Subscription cancelled for refunded order %1$s#%2$s%3$s."
+msgstr ""
+
 #. translators: %s: billing frequency (e.g. "month" or "every 2 weeks").
 #: src/Subscription/Proposal/RecurringShippingResolver.php:53
 #: templates/checkout/recurring-shipping.php:42
@@ -774,51 +774,69 @@ msgstr ""
 msgid "Manual renewal order awaiting customer payment."
 msgstr ""
 
-#: src/Subscription/Schedule.php:66
-msgid "Subscription put on hold by the system due to a configuration error (zero-length billing interval). Please check the subscription settings."
-msgstr ""
-
-#: src/Subscription/Subscription.php:131
-msgid "Payment status marked complete."
-msgstr ""
-
 #. translators: 1: old order status 2: new order status
-#: src/Subscription/Subscription.php:546
+#: src/Subscription/Subscription.php:441
 #, php-format
 msgid "Order status changed from %1$s to %2$s."
 msgstr ""
 
 #. translators: %s: new order status
-#: src/Subscription/Subscription.php:550
+#: src/Subscription/Subscription.php:445
 #, php-format
 msgid "Order status set to %s."
 msgstr ""
 
-#: src/Subscription/SubscriptionUpdater.php:27
-#, php-format
-msgctxt "subscription note after linking to a parent order"
-msgid "Subscription linked to parent order %s via admin/api."
+#: src/Subscription/Subscription.php:558
+msgid "Payment status marked complete."
 msgstr ""
 
-#: src/Subscription/SubscriptionUpdater.php:63
+#. translators: 1: parent order number, 2: update origin label.
+#: src/Subscription/SubscriptionUpdater.php:33
+#, php-format
+msgctxt "subscription note after linking to a parent order"
+msgid "Subscription linked to parent order %1$s via %2$s."
+msgstr ""
+
+#: src/Subscription/SubscriptionUpdater.php:69
 msgid "Start date"
 msgstr ""
 
-#: src/Subscription/SubscriptionUpdater.php:64
-#: src/Subscription/SubscriptionUpdater.php:105
+#: src/Subscription/SubscriptionUpdater.php:70
 msgid "Next payment date"
 msgstr ""
 
-#: src/Subscription/SubscriptionUpdater.php:65
+#: src/Subscription/SubscriptionUpdater.php:71
 msgid "Trial end date"
 msgstr ""
 
-#: src/Subscription/SubscriptionUpdater.php:66
+#: src/Subscription/SubscriptionUpdater.php:72
 msgid "End date"
 msgstr ""
 
-#: src/Subscription/SubscriptionUpdater.php:118
-msgid "Subscription dates updated via admin/api"
+#. translators: %s: update origin label.
+#: src/Subscription/SubscriptionUpdater.php:98
+#, php-format
+msgid "Subscription dates updated via %s"
+msgstr ""
+
+#: src/Subscription/SubscriptionUpdater.php:111
+msgid "REST API"
+msgstr ""
+
+#: src/Subscription/SubscriptionUpdater.php:115
+msgid "admin AJAX"
+msgstr ""
+
+#: src/Subscription/SubscriptionUpdater.php:119
+msgid "admin panel"
+msgstr ""
+
+#: src/Subscription/SubscriptionUpdater.php:123
+msgid "WP-CLI"
+msgstr ""
+
+#: src/Subscription/SubscriptionUpdater.php:126
+msgid "system"
 msgstr ""
 
 #: src/Subscription/Utils/Status.php:23
@@ -878,7 +896,7 @@ msgstr[1] ""
 
 #. translators: placeholder is an order number.
 #: templates/admin/order/related-subscription.php:12
-#: templates/admin/subscription/metabox/details.php:115
+#: templates/admin/subscription/metabox/details.php:114
 #, php-format
 msgid "#%1$s"
 msgstr ""
@@ -957,95 +975,95 @@ msgid "One time shipping"
 msgstr ""
 
 #. translators: placeholder is the ID of the subscription.
-#: templates/admin/subscription/metabox/details.php:32
+#: templates/admin/subscription/metabox/details.php:31
 #, php-format
 msgctxt "edit subscription header"
 msgid "Subscription #%s details"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:38
+#: templates/admin/subscription/metabox/details.php:37
 msgid "General"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:43
+#: templates/admin/subscription/metabox/details.php:42
 msgid "Customer:"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:54
+#: templates/admin/subscription/metabox/details.php:53
 msgid "View other subscriptions &rarr;"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:59
+#: templates/admin/subscription/metabox/details.php:58
 msgid "Profile &rarr;"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:67
+#: templates/admin/subscription/metabox/details.php:66
 msgid "Search for a customer&hellip;"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:79
+#: templates/admin/subscription/metabox/details.php:78
 msgid "Subscription status:"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:111
+#: templates/admin/subscription/metabox/details.php:110
 msgid "Initial order: "
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:123
+#: templates/admin/subscription/metabox/details.php:122
 msgid "Initial order:"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:127
+#: templates/admin/subscription/metabox/details.php:126
 msgid "Select an order&hellip;"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:139
+#: templates/admin/subscription/metabox/details.php:138
 msgid "Billing"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:140
-#: templates/admin/subscription/metabox/details.php:245
+#: templates/admin/subscription/metabox/details.php:139
+#: templates/admin/subscription/metabox/details.php:231
 msgid "Edit"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:142
+#: templates/admin/subscription/metabox/details.php:141
 msgid "Load billing address"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:150
-#: templates/admin/subscription/metabox/details.php:152
-#: templates/admin/subscription/metabox/details.php:256
-#: templates/admin/subscription/metabox/details.php:258
+#: templates/admin/subscription/metabox/details.php:149
+#: templates/admin/subscription/metabox/details.php:151
+#: templates/admin/subscription/metabox/details.php:242
+#: templates/admin/subscription/metabox/details.php:244
 msgid "Address"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:152
+#: templates/admin/subscription/metabox/details.php:151
 msgid "No billing address set."
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:173
-#: templates/admin/subscription/metabox/details.php:333
-#: templates/admin/subscription/metabox/details.php:346
+#: templates/admin/subscription/metabox/details.php:172
+#: templates/admin/subscription/metabox/details.php:319
+#: templates/admin/subscription/metabox/details.php:332
 msgid "Payment Method"
 msgstr ""
 
 #. translators: %s: gateway ID.
-#: templates/admin/subscription/metabox/details.php:178
-#: templates/admin/subscription/metabox/details.php:348
+#: templates/admin/subscription/metabox/details.php:177
+#: templates/admin/subscription/metabox/details.php:334
 #, php-format
 msgctxt "The gateway ID displayed on the Edit Subscriptions screen when editing payment method."
 msgid "Gateway ID: [%s]"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:234
+#: templates/admin/subscription/metabox/details.php:220
 msgid "Customer change payment method page &rarr;"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:236
+#: templates/admin/subscription/metabox/details.php:222
 msgid "Customer add payment method page &rarr;"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:244
+#: templates/admin/subscription/metabox/details.php:230
 #: templates/checkout/recurring-item-totals/shipping/failed-to-calculate.php:5
 #: templates/checkout/recurring-item-totals/shipping/no-shipping.php:5
 #: templates/checkout/recurring-item-totals/shipping/not-selected.php:5
@@ -1055,24 +1073,24 @@ msgstr ""
 msgid "Shipping"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:247
+#: templates/admin/subscription/metabox/details.php:233
 msgid "Load shipping address"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:248
+#: templates/admin/subscription/metabox/details.php:234
 msgid "Copy billing address"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:258
+#: templates/admin/subscription/metabox/details.php:244
 msgid "No shipping address set."
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:281
-#: templates/admin/subscription/metabox/details.php:318
+#: templates/admin/subscription/metabox/details.php:267
+#: templates/admin/subscription/metabox/details.php:304
 msgid "Customer Provided Note"
 msgstr ""
 
-#: templates/admin/subscription/metabox/details.php:319
+#: templates/admin/subscription/metabox/details.php:305
 msgid "Customer's notes about the order"
 msgstr ""
 

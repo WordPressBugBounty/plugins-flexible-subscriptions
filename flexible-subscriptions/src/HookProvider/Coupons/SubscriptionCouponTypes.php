@@ -175,8 +175,9 @@ final class SubscriptionCouponTypes implements HookProvider {
 		$this->logger->debug(
 			'Trying to apply discount coupon...',
 			[
-				'coupon'  => $coupon,
-				'product' => $product,
+				'coupon_id'      => $coupon->get_id(),
+				'discount_type'  => $discount_type,
+				'product_id'     => $product->get_id(),
 			]
 		);
 
@@ -184,9 +185,9 @@ final class SubscriptionCouponTypes implements HookProvider {
 			$this->logger->debug(
 				'Cannot apply discount coupon for non subscription product "{pid}"',
 				[
-					'pid'                   => $product->get_id(),
-					'coupon'                => $coupon,
-					'product'               => $product,
+					'pid'           => $product->get_id(),
+					'coupon_id'     => $coupon->get_id(),
+					'discount_type' => $discount_type,
 				]
 			);
 			return false;
@@ -205,9 +206,9 @@ final class SubscriptionCouponTypes implements HookProvider {
 			$this->logger->debug(
 				'Sign up fee discount coupon cannot be applied to product "{pid}" which has no sign up fee.',
 				[
-					'pid'                   => $product->get_id(),
-					'coupon'                => $coupon,
-					'product'               => $subscription_product,
+					'pid'           => $product->get_id(),
+					'coupon_id'     => $coupon->get_id(),
+					'discount_type' => $discount_type,
 				]
 			);
 			return false;
@@ -216,9 +217,9 @@ final class SubscriptionCouponTypes implements HookProvider {
 		$this->logger->debug(
 			'Applying discount coupon for product "{pid}".',
 			[
-				'pid'               => $product->get_id(),
-				'coupon'            => $coupon,
-				'product'           => $subscription_product,
+				'pid'           => $product->get_id(),
+				'coupon_id'     => $coupon->get_id(),
+				'discount_type' => $discount_type,
 			]
 		);
 		return true;

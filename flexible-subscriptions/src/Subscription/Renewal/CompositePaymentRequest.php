@@ -30,8 +30,8 @@ class CompositePaymentRequest implements RequestPaymentStrategy {
 				$this->logger->debug(
 					'Chosen renewal strategy for subscription "{sid}".',
 					[
-						'sid'              => $subscription->get_id(),
-						'renewal_strategy' => $renewal_strategy,
+						'sid'                    => $subscription->get_id(),
+						'renewal_strategy_class' => get_class( $renewal_strategy ),
 					]
 				);
 				return true;
@@ -46,8 +46,8 @@ class CompositePaymentRequest implements RequestPaymentStrategy {
 		$this->logger->debug(
 			'Handling payment request with "{strategy}" strategy',
 			[
-				'payment_request' => $payment_request,
-				'strategy'        => $this->supported_strategy,
+				'oid'            => $payment_request->get_id(),
+				'strategy'       => get_class( $this->supported_strategy ),
 			]
 		);
 		$this->supported_strategy->request_payment( $payment_request );

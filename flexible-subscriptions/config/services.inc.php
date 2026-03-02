@@ -4,6 +4,7 @@ use WPDesk\FlexibleSubscriptions\Admin\QueryEnhancer\OrderSubtypeEnhancer;
 use WPDesk\FlexibleSubscriptions\Admin\QueryEnhancer\OrderSubtype\FilterableSubtype;
 use WPDesk\FlexibleSubscriptions\Admin\QueryEnhancer\OrderSubtype\RenewalSubtype;
 use WPDesk\FlexibleSubscriptions\Admin\QueryEnhancer\SubscriptionRelatedOrdersEnhancer;
+use WPDesk\FlexibleSubscriptions\EventDispatcher\DomainEventBus;
 use WPDesk\FlexibleSubscriptions\HookProvider\Admin\OrderColumns;
 use WPDesk\FlexibleSubscriptions\HookProvider\Admin\ProductView;
 use WPDesk\FlexibleSubscriptions\HookProvider\Admin\QueryEnhancement;
@@ -17,6 +18,8 @@ use WPDesk\FlexibleSubscriptions\HookProvider\Email\OrderAdditionalInfo;
 use WPDesk\FlexibleSubscriptions\HookProvider\Marketing\SupportPage;
 use WPDesk\FlexibleSubscriptions\HookProvider\Product\AddToCartTemplate;
 use WPDesk\FlexibleSubscriptions\PaymentMethodSeeker;
+use WPDesk\FlexibleSubscriptions\Subscription\EventListener;
+use WPDesk\FlexibleSubscriptions\Subscription\Events;
 use WPDesk\FlexibleSubscriptions\Subscription\Renewal\AutomaticRequest;
 use WPDesk\FlexibleSubscriptions\Subscription\Renewal\CompositePaymentRequest;
 use WPDesk\FlexibleSubscriptions\Subscription\Renewal\Lock\RenewalLock;
@@ -25,9 +28,10 @@ use WPDesk\FlexibleSubscriptions\Subscription\Renewal\ManualRenewal;
 use WPDesk\FlexibleSubscriptions\Subscription\Renewal\RenewalFactory;
 use WPDesk\FlexibleSubscriptions\Subscription\Renewal\RequestPaymentStrategy;
 use WPDesk\FlexibleSubscriptions\Subscription\Renewal\ZeroTotalRequest;
-use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionFinder;
 use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionFinderInterface;
+use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionRepository;
 use WPDesk\FlexibleSubscriptions\Vendor\Psr\Clock\ClockInterface;
+use WPDesk\FlexibleSubscriptions\Vendor\Psr\EventDispatcher\EventDispatcherInterface;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Clock\RequestTimeClock;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Forms\Resolver\DefaultFormFieldResolver;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Plugin\Plugin;
@@ -129,13 +133,13 @@ return [
 	ClockInterface::class                   => autowire( RequestTimeClock::class ),
 
 	QueryEnhancement::class                 => autowire( QueryEnhancement::class )
-	->constructorParameter(
-		'enhancers',
-		[
-			get( SubscriptionRelatedOrdersEnhancer::class ),
-			get( OrderSubtypeEnhancer::class ),
-		]
-	),
+		->constructorParameter(
+			'enhancers',
+			[
+				get( SubscriptionRelatedOrdersEnhancer::class ),
+				get( OrderSubtypeEnhancer::class ),
+			]
+		),
 
 	OrderSubtypeEnhancer::class             => autowire( OrderSubtypeEnhancer::class )
 		->constructorParameter(
@@ -146,8 +150,52 @@ return [
 			]
 		),
 
-	SubscriptionFinderInterface::class      => autowire( SubscriptionFinder::class ),
+	SubscriptionFinderInterface::class      => autowire( SubscriptionRepository::class ),
 	RenewalFactory::class => autowire(),
 
-	WC_Shipping::class => static fn () => WC()->shipping()
+	WC_Shipping::class => static fn () => WC()->shipping(),
+
+	EventDispatcherInterface::class => get( DomainEventBus::class),
+
+	DomainEventBus::class => static function (\WPDesk\FlexibleSubscriptions\Vendor\DI\Container $c) {
+		$bus = new DomainEventBus();
+		$bus->subscribe(
+			Events\BillingFrequencyUpdated::class,
+			[ $c->get( EventListener\SyncScheduleOnSubscriptionChange::class ), 'on_billing_frequency_updated' ]
+		);
+		$bus->subscribe(
+			Events\CancelledDateUpdated::class,
+			[ $c->get( EventListener\SyncScheduleOnSubscriptionChange::class ), 'on_cancelled_date_updated' ]
+		);
+		$bus->subscribe(
+			Events\EndDateUpdated::class,
+			[ $c->get( EventListener\SyncScheduleOnSubscriptionChange::class ), 'on_end_date_updated' ]
+		);
+		$bus->subscribe(
+			Events\NextPaymentDateUpdated::class,
+			[ $c->get( EventListener\SyncScheduleOnSubscriptionChange::class ), 'on_next_payment_date_updated' ]
+		);
+		$bus->subscribe(
+			Events\StatusUpdated::class,
+			[ $c->get( EventListener\SyncScheduleOnSubscriptionChange::class ), 'on_status_updated' ]
+		);
+		$bus->subscribe(
+			Events\SubscriptionActivated::class,
+			[ $c->get( EventListener\SyncScheduleOnSubscriptionChange::class ), 'on_subscription_activated' ]
+		);
+		$bus->subscribe(
+			Events\SubscriptionPaused::class,
+			[ $c->get( EventListener\SyncScheduleOnSubscriptionChange::class ), 'on_subscription_paused' ]
+		);
+		$bus->subscribe(
+			Events\SubscriptionCancelled::class,
+			[ $c->get( EventListener\SyncScheduleOnSubscriptionChange::class ), 'on_subscription_cancelled' ]
+		);
+		$bus->subscribe(
+			Events\SubscriptionExpired::class,
+			[ $c->get( EventListener\SyncScheduleOnSubscriptionChange::class ), 'on_subscription_expired' ]
+		);
+
+		return $bus;
+	},
 ];

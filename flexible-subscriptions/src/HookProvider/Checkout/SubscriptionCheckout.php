@@ -51,7 +51,7 @@ class SubscriptionCheckout implements HookProvider {
 			return;
 		}
 
-		// Make sure, any previous subscriptions (which are likely failed) are deleted before processing.
+		// Make sure any previous subscriptions (which are likely failed) are deleted before processing.
 		$subscriptions = $this->finder->find_all_by_order( $order );
 		foreach ( $subscriptions as $subscription ) {
 			$subscription->delete( true );
@@ -60,23 +60,12 @@ class SubscriptionCheckout implements HookProvider {
 		$this->logger->debug(
 			'Creating subscriptions from items in cart with order "{oid}"...',
 			[
-				'oid'               => $order->get_id(),
-				'candidates'        => (string) $this->candidates,
-				'order'             => $order,
+				'oid'             => $order->get_id(),
+				'candidate_count' => count( $this->candidates ),
 			]
 		);
 
 		foreach ( $this->candidates as $group => $candidate ) {
-			$this->logger->debug(
-				'Building subscription from cart group "{gid}" with order "{oid}"',
-				[
-					'gid'                   => $group,
-					'oid'                   => $order->get_id(),
-					'candidate'             => (string) $candidate,
-					'order'                 => $order,
-				]
-			);
-
 			$subscription = $this->creator->build_subscription( $order, $candidate );
 
 			do_action( 'fsub/subscription/new', $subscription, $order, $candidate );
@@ -84,12 +73,10 @@ class SubscriptionCheckout implements HookProvider {
 			$this->logger->debug(
 				'Created subscription "{sid}" from cart group "{gid}" with order "{oid}"',
 				[
-					'sid'                   => $subscription->get_id(),
-					'gid'                   => $group,
-					'oid'                   => $order->get_id(),
-					'candidate'             => (string) $candidate,
-					'order'                 => $order,
-					'subscription'          => (string) $subscription,
+					'sid'             => $subscription->get_id(),
+					'gid'             => $group,
+					'oid'             => $order->get_id(),
+					'candidate_total' => $candidate->get_total(),
 				]
 			);
 		}
