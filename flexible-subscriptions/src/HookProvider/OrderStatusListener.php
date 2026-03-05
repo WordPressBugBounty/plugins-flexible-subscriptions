@@ -8,7 +8,6 @@ use WC_Order;
 use WPDesk\FlexibleSubscriptions\Subscription\Actions\ActivateSubscription;
 use WPDesk\FlexibleSubscriptions\Subscription\Actions\ProcessPaidRenewal;
 use WPDesk\FlexibleSubscriptions\Subscription\Actions\CancelRefundedSubscriptions;
-use WPDesk\FlexibleSubscriptions\Subscription\OrderStatus\PaymentRequestPaidProcessor;
 use WPDesk\FlexibleSubscriptions\Subscription\Renewal\Renewal;
 use WPDesk\FlexibleSubscriptions\Subscription\Subscription;
 use WPDesk\FlexibleSubscriptions\Utils\HookProvider;

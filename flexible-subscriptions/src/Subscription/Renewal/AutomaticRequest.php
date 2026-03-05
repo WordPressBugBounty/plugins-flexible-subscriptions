@@ -21,6 +21,9 @@ final class AutomaticRequest implements RequestPaymentStrategy {
 	}
 
 	public function request_payment( WC_Order $payment_request ): void {
+		// We have to make sure payment gateways are loaded.
+		WC()->payment_gateways();
+
 		do_action( 'fsub/subscription/payment_request/pay', $payment_request );
 	}
 }

@@ -173,40 +173,46 @@ final class GenerateRenewalOrder {
 
 			$this->repository->save( $subscription );
 
-			if ( $this->renewal_strategy->supports( $subscription, $renewal->get_order() ) ) {
-				$this->renewal_strategy->request_payment( $renewal->get_order() );
-				$this->logger->debug(
-					'Renewal for subscription "{sid}" handled by renewal strategy',
-					[
-						'sid'     => $subscription->get_id(),
-						'renewal' => $renewal->get_id(),
-					]
-				);
-			} else {
-				$this->logger->debug(
-					'No renewal strategy could handle a renewal coming from subscription "{sid}".',
-					[
-						'sid'     => $subscription->get_id(),
-						'renewal' => $renewal->get_id(),
-					]
-				);
-			}
-
+			// Persist renewal metadata before handing the order to the gateway.
 			$renewal->save();
+		} finally {
+			// Release the lock before requesting payment. The critical section is
+			// over: subscription is on-hold (prevents duplicate renewals via
+			// is_active() guard) and the renewal order is fully persisted.
+			// Releasing here allows ProcessPaidRenewal to acquire the lock when
+			// a synchronous gateway (e.g. Stripe) completes payment in the same request.
+			$this->renewal_lock->release( $subscription->get_id(), $lock_owner );
+		}
 
+		if ( $this->renewal_strategy->supports( $subscription, $renewal->get_order() ) ) {
+			$this->renewal_strategy->request_payment( $renewal->get_order() );
 			$this->logger->debug(
-				'Processed renewal "{rid}" for subscription "{sid}"',
+				'Renewal for subscription "{sid}" handled by renewal strategy',
 				[
-					'rid' => $renewal->get_id(),
-					'sid' => $subscription->get_id(),
+					'sid'     => $subscription->get_id(),
+					'renewal' => $renewal->get_id(),
 				]
 			);
+		} else {
+			$this->logger->debug(
+				'No renewal strategy could handle a renewal coming from subscription "{sid}".',
+				[
+					'sid'     => $subscription->get_id(),
+					'renewal' => $renewal->get_id(),
+				]
+			);
+		}
 
-			if ( $created_new ) {
-				do_action( 'fsub/subscription_renewal/created', $renewal->get_order(), $subscription );
-			}
-		} finally {
-			$this->renewal_lock->release( $subscription->get_id(), $lock_owner );
+		$this->logger->debug(
+			'Processed renewal "{rid}" for subscription "{sid}"',
+			[
+				'rid' => $renewal->get_id(),
+				'sid' => $subscription->get_id(),
+			]
+		);
+
+		if ( $created_new ) {
+			do_action( 'fsub/subscription_renewal/created', $renewal->get_order(), $subscription );
 		}
 	}
 }
