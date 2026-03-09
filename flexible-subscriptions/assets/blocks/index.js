@@ -95,11 +95,7 @@ const OrderMetaForSubscriptions = ( { extensions, cart } ) => {
 		const firstPaymentDateString = sprintf(
 			// translators: %s: formatted date.
 			__( 'First renewal: %s', 'flexible-subscriptions' ),
-			new Date( firstPaymentDate ).toLocaleDateString( undefined, {
-				year: 'numeric',
-				month: 'long',
-				day: 'numeric',
-			} )
+			firstPaymentDate
 		);
 
 		const shippingAmount = getSelectedShippingValue( totals );

@@ -6,7 +6,7 @@ Donate link: https://wpdesk.net/sk/flexible-subscriptions-rm-donate
 Requires at least: 6.3
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.7.7
+Stable tag: 1.7.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -160,6 +160,9 @@ Please report security bugs found in the source code of the Flexible Subscriptio
 19. Support tab with quick instructions about the plugin.
 
 == Changelog ==
+
+= 1.7.8 - 2026-03-09 =
+* First renewal date displayed in checkout is now in the site's locale, not user's browser locale, to ensure consistency with the rest of the site and avoid confusion.
 
 = 1.7.7 - 2026-03-05 =
 * Fixed payment gateways not always being loaded, when processing renewal payment.

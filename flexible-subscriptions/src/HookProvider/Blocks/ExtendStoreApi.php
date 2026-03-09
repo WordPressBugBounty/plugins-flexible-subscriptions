@@ -127,10 +127,11 @@ class ExtendStoreApi implements HookProvider {
 		foreach ( $this->candidates as $candidate ) {
 			$billing_frequency = $candidate->get_billing_frequency();
 			$expiration        = $candidate->get_expiration();
+			$first_payment     = $candidate->get_first_payment_date();
 
 			$future_subscriptions[] = [
 				'key'                          => $candidate->get_group(),
-				'first_payment_date'           => $candidate->get_first_payment_date()->format( 'Y-m-d H:i:s' ),
+				'first_payment_date'           => wp_date( get_option( 'date_format' ), $first_payment->getTimestamp() ),
 				'billing_frequency_readable'   => $billing_frequency->to_readable_string(),
 				'expiration_readable'          => $expiration ? $expiration->to_readable_string() : '',
 				'totals'                       => $currency_formatter->format(
@@ -174,8 +175,9 @@ class ExtendStoreApi implements HookProvider {
 					'properties' => [
 						'key'                          => [ 'type' => 'string' ],
 						'first_payment_date'           => [
-							'type'   => 'string',
-							'format' => 'date-time',
+							'description' => __( 'Localized first renewal date for the subscription.', 'flexible-subscriptions' ),
+							'type'        => 'string',
+							'readonly'    => true,
 						],
 						'billing_frequency_readable'   => [
 							'description' => __( 'Human-readable billing frequency for the subscription.', 'flexible-subscriptions' ),
