@@ -3,15 +3,15 @@
  * Plugin Name: Flexible Subscriptions
  * Plugin URI: https://www.wpdesk.net/sk/flexible-subscriptions-plugin/
  * Description: Flexible Subscriptions is a WooCommerce extension that allows you to create flexible subscription products.
- * Version: 1.7.8
+ * Version: 1.7.9
  * Author: WP Desk
  * Author URI: https://www.wpdesk.net/sk/flexible-subscriptions-author/
  * Text Domain: flexible-subscriptions
  * Domain Path: /lang/
  * Requires at least: 6.4
  * Tested up to: 6.9
- * WC requires at least: 10.1
- * WC tested up to: 10.5
+ * WC requires at least: 10.3
+ * WC tested up to: 10.6
  * License: GPL v2 or later
  * Requires PHP: 7.4
  * Requires Plugins: woocommerce
