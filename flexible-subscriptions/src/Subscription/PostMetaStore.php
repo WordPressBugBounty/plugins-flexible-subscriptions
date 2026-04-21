@@ -26,6 +26,7 @@ class PostMetaStore extends \WC_Order_Data_Store_CPT implements \WC_Object_Data_
 		'_current_period_end_utc',
 		'_last_payment_request_id',
 		'_trial_interval',
+		'_expiration_interval',
 	];
 
 	/**
@@ -43,6 +44,7 @@ class PostMetaStore extends \WC_Order_Data_Store_CPT implements \WC_Object_Data_
 
 		'_trial_end_date_utc'                    => 'trial_end_date',
 		'_trial_interval'                        => 'trial_interval',
+		'_expiration_interval'                   => 'expiration_interval',
 		'_cancelled_date_utc'                    => 'cancelled_date',
 		'_end_date_utc'                          => 'end_date',
 		'_start_date_utc'                        => 'start_date',
@@ -164,13 +166,27 @@ class PostMetaStore extends \WC_Order_Data_Store_CPT implements \WC_Object_Data_
 					continue;
 				}
 
-				if ( str_ends_with( $meta_key, 'utc' ) ) {
-					$meta_value = new \DateTimeImmutable( $meta_value, new \DateTimeZone( 'UTC' ) );
-				}
+				$meta_value                = $this->normalize_meta_value_for_prop( $meta_key, $meta_value );
 				$props_to_set[ $prop_key ] = $meta_value;
 			}
 		}
 
 		$subscription->set_props( $props_to_set );
+	}
+
+	/**
+	 * @param mixed $meta_value
+	 * @return mixed
+	 */
+	private function normalize_meta_value_for_prop( string $meta_key, $meta_value ) {
+		if ( str_ends_with( $meta_key, '_utc' ) ) {
+			return new \DateTimeImmutable( (string) $meta_value, new \DateTimeZone( 'UTC' ) );
+		}
+
+		if ( in_array( $meta_key, [ '_billing_frequency', '_trial_interval', '_expiration_interval' ], true ) ) {
+			return new WPInterval( (string) $meta_value );
+		}
+
+		return $meta_value;
 	}
 }

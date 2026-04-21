@@ -51,11 +51,12 @@ final class ProcessPaidRenewal {
 
 		if ( $subscription->get_recent_payment_request_id() !== $renewal->get_id() ) {
 			$this->logger->warning(
-				'Order "{oid}" is not the latest payment request for subscription "{sid}". Skipping paid renewal.',
+				'billing.renewal.process_paid.skipped',
 				[
-					'sid'         => $subscription->get_id(),
-					'oid'         => $renewal->get_id(),
-					'skip_reason' => LifecycleSkipReason::RENEWAL_NOT_LATEST_PAYMENT_REQUEST,
+					'subscription_id'    => $subscription->get_id(),
+					'renewal_id'         => $renewal->get_id(),
+					'payment_request_id' => $renewal->get_id(),
+					'skip_reason'        => LifecycleSkipReason::RENEWAL_NOT_LATEST_PAYMENT_REQUEST,
 				]
 			);
 			return;
@@ -63,11 +64,12 @@ final class ProcessPaidRenewal {
 
 		if ( $renewal->is_period_advanced() ) {
 			$this->logger->debug(
-				'Renewal "{oid}" period already advanced for subscription "{sid}". Skipping.',
+				'billing.renewal.process_paid.skipped',
 				[
-					'sid'         => $subscription->get_id(),
-					'oid'         => $renewal->get_id(),
-					'skip_reason' => LifecycleSkipReason::RENEWAL_PERIOD_ALREADY_ADVANCED,
+					'subscription_id'    => $subscription->get_id(),
+					'renewal_id'         => $renewal->get_id(),
+					'payment_request_id' => $renewal->get_id(),
+					'skip_reason'        => LifecycleSkipReason::RENEWAL_PERIOD_ALREADY_ADVANCED,
 				]
 			);
 			return;
@@ -76,11 +78,12 @@ final class ProcessPaidRenewal {
 		$lock_owner = $this->renewal_lock->acquire( $subscription->get_id(), MINUTE_IN_SECONDS );
 		if ( $lock_owner === null ) {
 			$this->logger->warning(
-				'Failed to acquire renewal lock for subscription "{sid}" while processing paid renewal "{oid}".',
+				'billing.renewal.process_paid.skipped',
 				[
-					'sid'         => $subscription->get_id(),
-					'oid'         => $renewal->get_id(),
-					'skip_reason' => LifecycleSkipReason::RENEWAL_LOCK_NOT_ACQUIRED,
+					'subscription_id'    => $subscription->get_id(),
+					'renewal_id'         => $renewal->get_id(),
+					'payment_request_id' => $renewal->get_id(),
+					'skip_reason'        => LifecycleSkipReason::RENEWAL_LOCK_NOT_ACQUIRED,
 				]
 			);
 			return;
@@ -91,11 +94,12 @@ final class ProcessPaidRenewal {
 			$advanced    = $subscription->advance_billing_period( $next_period );
 			if ( ! $advanced ) {
 				$this->logger->warning(
-					'Failed to advance billing period for subscription "{sid}" and order "{oid}".',
+					'billing.renewal.process_paid.skipped',
 					[
-						'sid'         => $subscription->get_id(),
-						'oid'         => $renewal->get_id(),
-						'skip_reason' => LifecycleSkipReason::RENEWAL_PERIOD_ADVANCE_FAILED,
+						'subscription_id'    => $subscription->get_id(),
+						'renewal_id'         => $renewal->get_id(),
+						'payment_request_id' => $renewal->get_id(),
+						'skip_reason'        => LifecycleSkipReason::RENEWAL_PERIOD_ADVANCE_FAILED,
 					]
 				);
 				return;
@@ -105,13 +109,26 @@ final class ProcessPaidRenewal {
 			$renewal->save();
 
 			$this->repository->save( $subscription );
+			$current_period_end = $subscription->get_current_period_end();
+			$this->logger->info(
+				'billing.renewal.process_paid.completed',
+				[
+					'subscription_id'    => $subscription->get_id(),
+					'renewal_id'         => $renewal->get_id(),
+					'payment_request_id' => $renewal->get_id(),
+					'billing_cycle'      => $subscription->get_billing_cycle(),
+					'current_period_end' => $current_period_end instanceof \DateTimeInterface ? $current_period_end->format( 'c' ) : null,
+					'order_status_from'  => $old_status,
+				]
+			);
 		} catch ( \Throwable $e ) {
 			$this->logger->warning(
-				'Failed to process paid renewal for subscription "{sid}" and order "{oid}": {message}',
+				'billing.renewal.process_paid.failed',
 				[
-					'sid'     => $subscription->get_id(),
-					'oid'     => $renewal->get_id(),
-					'message' => $e->getMessage(),
+					'subscription_id'    => $subscription->get_id(),
+					'renewal_id'         => $renewal->get_id(),
+					'payment_request_id' => $renewal->get_id(),
+					'message'            => $e->getMessage(),
 				]
 			);
 		} finally {

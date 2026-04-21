@@ -49,11 +49,12 @@ class PaymentRequestProcessor implements HookProvider {
 		} catch ( \Throwable $e ) {
 			$error_message = $e->getMessage();
 			$this->logger->critical(
-				'Error processing renewal for subscription "{sid}": {message}',
+				'billing.payment_request.process.failed',
 				[
-					'sid'     => $subscription_id,
-					'message' => $error_message,
-					'trace'   => $e->getTraceAsString(),
+					'event'           => 'billing.payment_request.process.failed',
+					'subscription_id' => $subscription_id,
+					'message'         => $error_message,
+					'trace'           => $e->getTraceAsString(),
 				]
 			);
 			// Clear dismissed notice on new errors.

@@ -143,14 +143,28 @@ class Subscription extends \WC_Order {
 			return;
 		}
 
-		$context ??= TransitionContext::manual( 'activate' );
-
-		$this->set_current_period_start( $period->getStartDate() );
-		$this->set_current_period_end( $period->getEndDate() );
+		$context      ??= TransitionContext::manual( 'activate' );
+		$is_first_cycle = $this->is_during_first_cycle();
 
 		$this->set_cancelled_date( null );
-		if ( ! $this->is_expired( $period->getStartDate() ) ) {
-			$this->set_end_date( null );
+
+		if ( $is_first_cycle ) {
+			$start = $this->to_immutable_date( $period->getStartDate() );
+
+			if ( $start instanceof \DateTimeImmutable ) {
+				$this->initialize_first_period(
+					$start,
+					$this->get_billing_frequency(),
+					$this->to_immutable_date( $this->get_trial_end_date() ),
+					$this->get_expiration_interval()
+				);
+			} else {
+				$this->set_current_period_start( $period->getStartDate() );
+				$this->set_current_period_end( $period->getEndDate() );
+			}
+		} else {
+			$this->set_current_period_start( $period->getStartDate() );
+			$this->set_current_period_end( $period->getEndDate() );
 		}
 
 		$this->set_status( 'active', $context->note, $context->manual );
@@ -623,6 +637,11 @@ class Subscription extends \WC_Order {
 
 	/** @internal */
 	public function get_expiration(): ?WPInterval {
+		return $this->get_expiration_interval();
+	}
+
+	/** @internal */
+	public function get_expiration_interval(): ?WPInterval {
 		$interval = $this->get_prop( 'expiration_interval' );
 		if ( $interval instanceof WPInterval ) {
 			return $interval;
@@ -835,6 +854,14 @@ class Subscription extends \WC_Order {
 
 	/** @internal */
 	public function set_expiration( $duration ): void {
+		$this->set_expiration_interval( $duration );
+	}
+
+	/**
+	 * @param WPInterval|string|null $duration
+	 * @internal
+	 */
+	public function set_expiration_interval( $duration ): void {
 		if ( is_string( $duration ) ) {
 			try {
 				$duration = new WPInterval( $duration );

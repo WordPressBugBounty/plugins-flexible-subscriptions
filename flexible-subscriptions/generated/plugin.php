@@ -5,7 +5,7 @@ declare(strict_types=1);
 return array (
   'Name' => 'Flexible Subscriptions',
   'PluginURI' => 'https://www.wpdesk.net/sk/flexible-subscriptions-plugin/',
-  'Version' => '1.7.9',
+  'Version' => '1.7.10',
   'Author' => 'WP Desk',
   'AuthorURI' => 'https://www.wpdesk.net/sk/flexible-subscriptions-author/',
   'TextDomain' => 'flexible-subscriptions',

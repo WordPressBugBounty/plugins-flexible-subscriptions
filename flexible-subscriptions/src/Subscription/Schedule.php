@@ -20,7 +20,12 @@ class Schedule {
 
 	public function schedule_payment_request( Subscription $subscription ): void {
 		if ( $this->is_scheduled_payment_request( $subscription ) ) {
-			$this->logger->debug( sprintf( 'Subscription #%d is already scheduled for payment request, unscheduling...', $subscription->get_id() ) );
+			$this->logger->debug(
+				'billing.schedule.create.replacing',
+				[
+					'subscription_id' => $subscription->get_id(),
+				]
+			);
 			as_unschedule_action(
 				'fsub/subscription/payment_request/process',
 				[
@@ -32,34 +37,50 @@ class Schedule {
 
 		if ( ! $subscription->is_active() ) {
 			$this->logger->debug(
-				'Aborting payment schedule for subscription #{id} because subscription is not active.',
+				'billing.schedule.create.skipped',
 				[
-					'id'             => $subscription->get_id(),
-					'current_status' => $subscription->get_status(),
+					'subscription_id' => $subscription->get_id(),
+					'current_status'  => $subscription->get_status(),
+					'skip_reason'     => 'subscription_not_active',
 				]
 			);
 			return;
 		}
 
 		if ( $subscription->is_expired() ) {
-			$this->logger->debug( sprintf( 'Subscription #%d is already expired, not scheduling payment request.', $subscription->get_id() ) );
+			$this->logger->debug(
+				'billing.schedule.create.skipped',
+				[
+					'subscription_id' => $subscription->get_id(),
+					'current_status'  => $subscription->get_status(),
+					'skip_reason'     => 'subscription_expired',
+				]
+			);
 			return;
 		}
 
 		$period = $subscription->get_current_period();
 
 		if ( ! $period->getEndDate() instanceof \DateTimeInterface ) {
-			$this->logger->warning( sprintf( 'Subscription period is missing end date for subscription #%d. Cannot schedule payment request.', $subscription->get_id() ) );
+			$this->logger->warning(
+				'billing.schedule.create.skipped',
+				[
+					'subscription_id' => $subscription->get_id(),
+					'current_status'  => $subscription->get_status(),
+					'skip_reason'     => 'missing_current_period_end',
+				]
+			);
 			return;
 		}
 
 		if ( $period->getEndDate() <= $this->clock->now() ) {
 			$this->logger->warning(
-				'Aborting payment schedule for subscription #{id} because next payment date is in the past: "{stamp}".',
+				'billing.schedule.create.skipped',
 				[
-					'id'             => $subscription->get_id(),
-					'stamp'          => $period->getEndDate()->format( 'c' ),
-					'current_status' => $subscription->get_status(),
+					'subscription_id' => $subscription->get_id(),
+					'scheduled_for'   => $period->getEndDate()->format( 'c' ),
+					'current_status'  => $subscription->get_status(),
+					'skip_reason'     => 'next_payment_in_past',
 				]
 			);
 			return;
@@ -68,23 +89,15 @@ class Schedule {
 		// Safeguard against zero-interval scheduling.
 		if ( $subscription->get_billing_frequency()->isEmpty() ) {
 			$this->logger->warning(
-				'Aborting payment schedule for subscription #{id} due to a zero-length billing interval.',
+				'billing.schedule.create.skipped',
 				[
-					'id'             => $subscription->get_id(),
-					'current_status' => $subscription->get_status(),
+					'subscription_id' => $subscription->get_id(),
+					'current_status'  => $subscription->get_status(),
+					'skip_reason'     => 'empty_billing_frequency',
 				]
 			);
 			return;
 		}
-
-		$this->logger->debug(
-			'Scheduling payment request for subscription #{id} at "{stamp}"...',
-			[
-				'id'             => $subscription->get_id(),
-				'stamp'          => $period->getEndDate()->format( 'c' ),
-				'current_status' => $subscription->get_status(),
-			]
-		);
 
 		$scheduled = as_schedule_single_action(
 			$period->getEndDate()->getTimestamp(),
@@ -95,18 +108,18 @@ class Schedule {
 
 		if ( $scheduled !== 0 ) {
 			$this->logger->debug(
-				'Succesfully scheduled payment request for subscription #{id}',
+				'billing.schedule.create.completed',
 				[
-					'id'    => $subscription->get_id(),
-					'stamp' => $period->getEndDate()->format( 'c' ),
+					'subscription_id' => $subscription->get_id(),
+					'scheduled_for'   => $period->getEndDate()->format( 'c' ),
 				]
 			);
 		} else {
 			$this->logger->warning(
-				'Failed to schedule payment request for subscription #{id}',
+				'billing.schedule.create.failed',
 				[
-					'id'    => $subscription->get_id(),
-					'stamp' => $period->getEndDate()->format( 'c' ),
+					'subscription_id' => $subscription->get_id(),
+					'scheduled_for'   => $period->getEndDate()->format( 'c' ),
 				]
 			);
 		}

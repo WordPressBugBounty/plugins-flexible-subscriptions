@@ -11,6 +11,7 @@ use WPDesk\FlexibleSubscriptions\HookProvider\Admin\QueryEnhancement;
 use WPDesk\FlexibleSubscriptions\HookProvider\Admin\RelatedSubscription;
 use WPDesk\FlexibleSubscriptions\HookProvider\Admin\SettingsPage;
 use WPDesk\FlexibleSubscriptions\HookProvider\Admin\SubscriptionColumns;
+use WPDesk\FlexibleSubscriptions\Log\BillingLogger;
 use WPDesk\FlexibleSubscriptions\HookProvider\Cart\DisplayRecurringTotals;
 use WPDesk\FlexibleSubscriptions\HookProvider\Checkout\OrderRelatedSubscriptionsDetails;
 use WPDesk\FlexibleSubscriptions\HookProvider\Checkout\RecurringShippingOptions;
@@ -107,6 +108,13 @@ return [
 	RecurringShippingOptions::class              => autowire()
 		->constructorParameter( 'renderer', get( 'renderer.front' ) ),
 
+	'logger.billing'                        => static function ( \WPDesk\FlexibleSubscriptions\Vendor\DI\Container $c, Plugin $p ) {
+		return new BillingLogger(
+			$c->get( \WPDesk\FlexibleSubscriptions\Vendor\Psr\Log\LoggerInterface::class ),
+			$p->get_version()
+		);
+	},
+
 	PaymentMethodSeeker::class              => autowire(),
 
 	/* Validator::class => autowire() */
@@ -127,6 +135,21 @@ return [
 				get( AutomaticRequest::class ),
 			]
 		),
+
+	\WPDesk\FlexibleSubscriptions\Subscription\Actions\GenerateRenewalOrder::class => autowire()
+		->constructorParameter( 'logger', get( 'logger.billing' ) ),
+
+	\WPDesk\FlexibleSubscriptions\Subscription\Actions\ProcessPaidRenewal::class => autowire()
+		->constructorParameter( 'logger', get( 'logger.billing' ) ),
+
+	\WPDesk\FlexibleSubscriptions\Subscription\Schedule::class => autowire()
+		->constructorParameter( 'logger', get( 'logger.billing' ) ),
+
+	\WPDesk\FlexibleSubscriptions\HookProvider\Subscription\AutorecoverPastDueSubscriptions::class => autowire()
+		->constructorParameter( 'logger', get( 'logger.billing' ) ),
+
+	\WPDesk\FlexibleSubscriptions\HookProvider\Subscription\PaymentRequestProcessor::class => autowire()
+		->constructorParameter( 'logger', get( 'logger.billing' ) ),
 
 	RenewalLock::class                      => autowire( WpOptionsRenewalLock::class ),
 

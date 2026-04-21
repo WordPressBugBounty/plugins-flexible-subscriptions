@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Flexible Subscriptions 1.7.9\n"
+"Project-Id-Version: Flexible Subscriptions 1.7.10\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/flexible-subscriptions\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-03-21T02:28:48+00:00\n"
+"POT-Creation-Date: 2026-04-21T08:32:36+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: flexible-subscriptions\n"
@@ -713,7 +713,7 @@ msgid "Deactivate WooCommerce Subscriptions"
 msgstr ""
 
 #: src/PaymentMethodSeeker.php:32
-#: src/Subscription/Subscription.php:592
+#: src/Subscription/Subscription.php:606
 msgid "Manual Renewal"
 msgstr ""
 
@@ -779,18 +779,18 @@ msgid "Manual renewal order awaiting customer payment."
 msgstr ""
 
 #. translators: 1: old order status 2: new order status
-#: src/Subscription/Subscription.php:441
+#: src/Subscription/Subscription.php:455
 #, php-format
 msgid "Order status changed from %1$s to %2$s."
 msgstr ""
 
 #. translators: %s: new order status
-#: src/Subscription/Subscription.php:445
+#: src/Subscription/Subscription.php:459
 #, php-format
 msgid "Order status set to %s."
 msgstr ""
 
-#: src/Subscription/Subscription.php:558
+#: src/Subscription/Subscription.php:572
 msgid "Payment status marked complete."
 msgstr ""
 

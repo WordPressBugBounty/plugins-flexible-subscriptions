@@ -57,10 +57,10 @@ final class GenerateRenewalOrder {
 	public function execute( Subscription $subscription ): void {
 		if ( ! $subscription->is_active() ) {
 			$this->logger->warning(
-				'Subscription "{sid}" is not active, while processing renewal. Skipping the process...',
+				'billing.renewal.generate.skipped',
 				[
-					'sid'         => $subscription->get_id(),
-					'skip_reason' => LifecycleSkipReason::SUBSCRIPTION_NOT_ACTIVE,
+					'subscription_id' => $subscription->get_id(),
+					'skip_reason'     => LifecycleSkipReason::SUBSCRIPTION_NOT_ACTIVE,
 				]
 			);
 			return;
@@ -68,10 +68,10 @@ final class GenerateRenewalOrder {
 
 		if ( $subscription->is_expired( $this->clock->now() ) ) {
 			$this->logger->warning(
-				'Subscription "{sid}" is expired, while processing renewal. Skipping the process...',
+				'billing.renewal.generate.skipped',
 				[
-					'sid'         => $subscription->get_id(),
-					'skip_reason' => LifecycleSkipReason::SUBSCRIPTION_EXPIRED,
+					'subscription_id' => $subscription->get_id(),
+					'skip_reason'     => LifecycleSkipReason::SUBSCRIPTION_EXPIRED,
 				]
 			);
 			$subscription->expire( $this->clock->now(), TransitionContext::system( 'renewal_expired' ) );
@@ -82,10 +82,10 @@ final class GenerateRenewalOrder {
 
 		if ( ! $can_renew ) {
 			$this->logger->warning(
-				'Creating a new renewal for subscription {sid} have been prevented by external integration',
+				'billing.renewal.generate.skipped',
 				[
-					'sid'         => $subscription->get_id(),
-					'skip_reason' => LifecycleSkipReason::RENEWAL_INTERRUPTED_BY_INTEGRATION,
+					'subscription_id' => $subscription->get_id(),
+					'skip_reason'     => LifecycleSkipReason::RENEWAL_INTERRUPTED_BY_INTEGRATION,
 				]
 			);
 			return;
@@ -103,10 +103,10 @@ final class GenerateRenewalOrder {
 		$lock_owner = $this->renewal_lock->acquire( $subscription->get_id(), 600 );
 		if ( $lock_owner === null ) {
 			$this->logger->warning(
-				'Failed to acquire renewal lock for subscription "{sid}". Skipping renewal processing...',
+				'billing.renewal.generate.skipped',
 				[
-					'sid'         => $subscription->get_id(),
-					'skip_reason' => LifecycleSkipReason::RENEWAL_LOCK_NOT_ACQUIRED,
+					'subscription_id' => $subscription->get_id(),
+					'skip_reason'     => LifecycleSkipReason::RENEWAL_LOCK_NOT_ACQUIRED,
 				]
 			);
 			return;
@@ -119,53 +119,23 @@ final class GenerateRenewalOrder {
 				return;
 			}
 
-			$this->logger->debug(
-				'Changing subscription "{sid}" status to "{status}"...',
-				[
-					'sid'    => $subscription->get_id(),
-					'status' => $status,
-				]
-			);
 			$this->update_status->execute( $subscription, $status, TransitionContext::system( 'renewal_awaiting' ) );
-			$this->logger->debug(
-				'Subscription "{sid}" status changed to "{status}".',
-				[
-					'sid'    => $subscription->get_id(),
-					'status' => $status,
-				]
-			);
 
 			$billing_cycle = $subscription->get_billing_cycle();
+			$this->logger->debug(
+				'billing.renewal.generate.started',
+				[
+					'subscription_id' => $subscription->get_id(),
+					'billing_cycle'   => $billing_cycle,
+				]
+			);
 
 			$created_new = false;
 			$renewal     = $this->in_flight_finder->find( $subscription, $billing_cycle );
-			if ( $renewal instanceof Renewal ) {
-				$this->logger->info(
-					'Reusing in-flight renewal order "{oid}" for subscription "{sid}" (cycle "{cycle}").',
-					[
-						'oid'   => $renewal->get_id(),
-						'sid'   => $subscription->get_id(),
-						'cycle' => $billing_cycle,
-					]
-				);
-			} else {
+			if ( ! $renewal instanceof Renewal ) {
 				$created_new = true;
-				$this->logger->debug(
-					'Creating a new renewal for subscription "{sid}"...',
-					[
-						'sid' => $subscription->get_id(),
-					]
-				);
-				$renewal = $this->renewal_factory->create_for( $subscription );
+				$renewal     = $this->renewal_factory->create_for( $subscription );
 			}
-
-			$this->logger->debug(
-				'Choosing a renewal strategy for renewal coming from subscription "{sid}"...',
-				[
-					'sid'     => $subscription->get_id(),
-					'renewal' => $renewal->get_id(),
-				]
-			);
 
 			// Record the renewal order before requesting payment to avoid a race
 			// where order status hooks fire before recent_payment_request_id is updated.
@@ -175,6 +145,17 @@ final class GenerateRenewalOrder {
 
 			// Persist renewal metadata before handing the order to the gateway.
 			$renewal->save();
+			$this->logger->debug(
+				'billing.renewal.generate.persisted',
+				[
+					'subscription_id'    => $subscription->get_id(),
+					'renewal_id'         => $renewal->get_id(),
+					'payment_request_id' => $renewal->get_id(),
+					'billing_cycle'      => $billing_cycle,
+					'gateway'            => $renewal->get_payment_method(),
+					'created_new'        => $created_new,
+				]
+			);
 		} finally {
 			// Release the lock before requesting payment. The critical section is
 			// over: subscription is on-hold (prevents duplicate renewals via
@@ -187,29 +168,26 @@ final class GenerateRenewalOrder {
 		if ( $this->renewal_strategy->supports( $subscription, $renewal->get_order() ) ) {
 			$this->renewal_strategy->request_payment( $renewal->get_order() );
 			$this->logger->debug(
-				'Renewal for subscription "{sid}" handled by renewal strategy',
+				'billing.renewal.generate.requested',
 				[
-					'sid'     => $subscription->get_id(),
-					'renewal' => $renewal->get_id(),
+					'subscription_id'    => $subscription->get_id(),
+					'renewal_id'         => $renewal->get_id(),
+					'payment_request_id' => $renewal->get_id(),
+					'billing_cycle'      => $subscription->get_billing_cycle(),
+					'gateway'            => $renewal->get_payment_method(),
 				]
 			);
 		} else {
 			$this->logger->debug(
-				'No renewal strategy could handle a renewal coming from subscription "{sid}".',
+				'billing.renewal.generate.skipped',
 				[
-					'sid'     => $subscription->get_id(),
-					'renewal' => $renewal->get_id(),
+					'subscription_id'    => $subscription->get_id(),
+					'renewal_id'         => $renewal->get_id(),
+					'payment_request_id' => $renewal->get_id(),
+					'skip_reason'        => 'strategy_not_supported',
 				]
 			);
 		}
-
-		$this->logger->debug(
-			'Processed renewal "{rid}" for subscription "{sid}"',
-			[
-				'rid' => $renewal->get_id(),
-				'sid' => $subscription->get_id(),
-			]
-		);
 
 		if ( $created_new ) {
 			do_action( 'fsub/subscription_renewal/created', $renewal->get_order(), $subscription );

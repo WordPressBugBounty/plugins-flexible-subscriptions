@@ -7,6 +7,7 @@ namespace WPDesk\FlexibleSubscriptions\HookProvider\Compatibility;
 use WC_Subscription;
 use WPDesk\FlexibleSubscriptions\Cart\SubscriptionCandidate;
 use WPDesk\FlexibleSubscriptions\Compatibility\Caster;
+use WPDesk\FlexibleSubscriptions\Subscription\Renewal\Renewal;
 use WPDesk\FlexibleSubscriptions\Utils\HookProvider;
 
 /**
@@ -46,9 +47,15 @@ final class HookMapper implements HookProvider {
 	}
 
 	public function on_updated_failing_payment_method( $subscription, $order ): void {
-		$gateway_id = $order->get_payment_method();
+		$renewal_order = $order instanceof Renewal ? $order->get_order() : $order;
+		$gateway_id    = $renewal_order->get_payment_method();
+
 		if ( $gateway_id ) {
-			do_action( 'woocommerce_subscription_failing_payment_method_updated_' . $gateway_id, $this->caster->cast_to( WC_Subscription::class, $subscription ), $order );
+			do_action(
+				'woocommerce_subscription_failing_payment_method_updated_' . $gateway_id,
+				$this->caster->cast_to( WC_Subscription::class, $subscription ),
+				$renewal_order
+			);
 		}
 	}
 
