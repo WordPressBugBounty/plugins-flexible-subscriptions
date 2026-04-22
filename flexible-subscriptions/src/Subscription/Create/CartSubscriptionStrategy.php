@@ -66,19 +66,20 @@ class CartSubscriptionStrategy implements SubscriptionCreationStrategy {
 						return \WC()->shipping()->calculate_shipping_for_package( $recurring_cart_package, $package_key );
 					}
 				);
+				$package_rates      = $this->extract_rates( $package );
 				$shipping_method_id = $this->candidate->get_shipping_method( $package_key ) ?? '';
 
 				if ( empty( $shipping_method_id ) ) {
 					$shipping_method_id = \WC()->checkout()->shipping_methods[ $package_key ] ?? '';
 				}
 
-				if ( empty( $shipping_method_id ) && ! empty( $package['rates'] ) ) {
-					$first_rate         = reset( $package['rates'] );
+				if ( empty( $shipping_method_id ) && ! empty( $package_rates ) ) {
+					$first_rate         = reset( $package_rates );
 					$shipping_method_id = $first_rate ? $first_rate->id : '';
 				}
 
-				if ( isset( $package['rates'][ $shipping_method_id ] ) ) {
-					$shipping_rate = $package['rates'][ $shipping_method_id ];
+				if ( isset( $package_rates[ $shipping_method_id ] ) ) {
+					$shipping_rate = $package_rates[ $shipping_method_id ];
 					$item          = new \WC_Order_Item_Shipping();
 					$item->set_props(
 						[
@@ -108,5 +109,15 @@ class CartSubscriptionStrategy implements SubscriptionCreationStrategy {
 				}
 			}
 		}
+	}
+
+	/**
+	 * @param array<string, mixed>|false $package
+	 * @return array<string, \WC_Shipping_Rate>
+	 */
+	private function extract_rates( $package ): array {
+		$rates = is_array( $package ) ? ( $package['rates'] ?? [] ) : [];
+
+		return is_array( $rates ) ? $rates : [];
 	}
 }

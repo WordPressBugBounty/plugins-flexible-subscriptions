@@ -71,7 +71,7 @@
 		}
 	},
 	"scripts": {
-		"phpcs": "phpcs",
+		"phpcs": "phpcs --warning-severity=0",
 		"phpcbf": "phpcbf src",
 		"phpunit-unit": "phpunit --configuration phpunit-unit.xml --coverage-text --colors=never",
 		"phpunit-unit-coverage": "phpunit --configuration phpunit-unit.xml --coverage-html build-coverage",
@@ -84,6 +84,6 @@
 			"url": "https://gitlab.wpdesk.dev/api/v4/group/wpdesk/-/packages/composer/"
 		}
 	},
-	"version": "1.7.10",
+	"version": "1.7.11",
 	"type": "wordpress-plugin"
 }

@@ -32,7 +32,8 @@ final class RecurringShippingResolver {
 
 				foreach ( $candidate->get_shipping_packages() as $package_key => $package ) {
 					$shipping            = $this->shipping->calculate_shipping_for_package( $package, $package_key );
-					$match_initial_rates = $this->rates_match_initial_package( $original_packages, $package_key, $shipping['rates'] );
+					$recurring_rates     = $this->extract_rates( $shipping );
+					$match_initial_rates = $this->rates_match_initial_package( $original_packages, $package_key, $recurring_rates );
 
 					$product_names   = array_map( static fn( $values ) => $values['data']->get_name(), $package['contents'] );
 					$product_names   = apply_filters( 'woocommerce_shipping_package_details_array', $product_names, $package );
@@ -40,10 +41,10 @@ final class RecurringShippingResolver {
 
 						$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods', [] );
 						$initial_method          = $chosen_shipping_methods[ $package_key ] ?? $chosen_shipping_methods[ RecurringShippingPackage::index_from_key( $package_key ) ] ?? '';
-					if ( $initial_method && isset( $shipping['rates'][ $initial_method ] ) ) {
+					if ( $initial_method && isset( $recurring_rates[ $initial_method ] ) ) {
 						$selected_method = $initial_method;
 					} else {
-						$first_rate      = reset( $shipping['rates'] );
+						$first_rate      = reset( $recurring_rates );
 						$selected_method = $first_rate ? (string) $first_rate->id : '';
 					}
 
@@ -56,7 +57,7 @@ final class RecurringShippingResolver {
 
 					$selections[] = new RecurringShippingPackage(
 						$package_key,
-						$shipping['rates'],
+						$recurring_rates,
 						$selected_method,
 						$package_details,
 						$package,
@@ -67,6 +68,16 @@ final class RecurringShippingResolver {
 				return $selections;
 			}
 		);
+	}
+
+	/**
+	 * @param array<string, mixed>|false $shipping
+	 * @return array<string, \WC_Shipping_Rate>
+	 */
+	private function extract_rates( $shipping ): array {
+		$rates = is_array( $shipping ) ? ( $shipping['rates'] ?? [] ) : [];
+
+		return is_array( $rates ) ? $rates : [];
 	}
 
 	private function rates_match_initial_package( array $original_packages, string $package_key, array $recurring_rates ): bool {

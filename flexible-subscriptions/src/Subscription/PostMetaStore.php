@@ -173,16 +173,15 @@ class PostMetaStore extends \WC_Order_Data_Store_CPT implements \WC_Object_Data_
 
 		$subscription->set_props( $props_to_set );
 	}
-
 	/**
 	 * @param mixed $meta_value
 	 * @return mixed
 	 */
 	private function normalize_meta_value_for_prop( string $meta_key, $meta_value ) {
+
 		if ( str_ends_with( $meta_key, '_utc' ) ) {
 			return new \DateTimeImmutable( (string) $meta_value, new \DateTimeZone( 'UTC' ) );
 		}
-
 		if ( in_array( $meta_key, [ '_billing_frequency', '_trial_interval', '_expiration_interval' ], true ) ) {
 			return new WPInterval( (string) $meta_value );
 		}

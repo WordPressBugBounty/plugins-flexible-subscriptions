@@ -425,15 +425,16 @@ class CustomOrdersTableStore extends OrdersTableDataStore {
 		// Call the parent version of this function which will set all the core order properties that a subscription inherits.
 		parent::init_order_record( $subscription, $subscription_id, $subscription_data );
 
-		if ( empty( $subscription_data->meta_data ) ) {
-			return;
-		}
-
 		// Flag the subscription as still being read from the database while we set our subscription properties.
 		$subscription->set_object_read( false );
 
 		// Set subscription specific properties that we store in meta.
-		$meta_data    = wp_list_pluck( $subscription_data->meta_data, 'meta_value', 'meta_key' );
+		$meta_data    = $this->get_subscription_meta_data( $subscription, $subscription_data );
+		if ( empty( $meta_data ) ) {
+			$subscription->set_object_read( true );
+			return;
+		}
+
 		$props_to_set = [];
 
 		foreach ( self::META_TO_PROPS_MAP as $meta_key => $prop_key ) {
@@ -462,6 +463,24 @@ class CustomOrdersTableStore extends OrdersTableDataStore {
 
 		// Flag the subscription as read.
 		$subscription->set_object_read( true );
+	}
+
+	/**
+	 * @param \WC_Abstract_Order $subscription
+	 * @return array<string, mixed>
+	 */
+	private function get_subscription_meta_data( $subscription, \stdClass $subscription_data ): array {
+		$meta_rows = $subscription_data->meta_data ?? [];
+
+		if ( empty( $meta_rows ) ) {
+			$meta_rows = $this->data_store_meta->read_meta( $subscription );
+		}
+
+		if ( empty( $meta_rows ) ) {
+			return [];
+		}
+
+		return wp_list_pluck( $meta_rows, 'meta_value', 'meta_key' );
 	}
 
 	/**

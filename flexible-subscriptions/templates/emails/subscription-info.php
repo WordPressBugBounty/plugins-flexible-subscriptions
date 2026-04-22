@@ -37,7 +37,14 @@ $has_automatic_renewal = false;
 		<tr>
 			<td class="td" scope="row" style="text-align:left;"><a href="<?php echo esc_url( ( $sent_to_admin ) ? $subscription->get_edit_order_url() : $subscription->get_view_order_url() ); ?>"><?php printf( esc_html_x( '#%s', 'subscription number in email table. (eg: #106)', 'flexible-subscriptions' ), esc_html( $subscription->get_order_number() ) ); ?></a></td>
 				<td class="td" scope="row" style="text-align:left;">
-					<?php echo esc_html( new DefaultDateFormat( $subscription->get_start_date() ) ); ?>
+					<?php
+					$start = $subscription->get_start_date();
+					if ( $start instanceof \DateTimeInterface ) {
+						echo esc_html( new DefaultDateFormat( $start ) );
+					} else {
+						echo esc_html__( 'N/A', 'flexible-subscriptions' );
+					}
+					?>
 				</td>
 				<td class="td" scope="row" style="text-align:left;">
 					<?php
@@ -84,6 +91,5 @@ if ( $has_automatic_renewal && ! $sent_to_admin ) { // && $subscription->get_tim
 }
 ?>
 </div>
-
 
 
