@@ -75,6 +75,7 @@ final class GenerateRenewalOrder {
 				]
 			);
 			$subscription->expire( $this->clock->now(), TransitionContext::system( 'renewal_expired' ) );
+			$this->repository->save( $subscription );
 			return;
 		}
 
