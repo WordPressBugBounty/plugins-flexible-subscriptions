@@ -29,9 +29,19 @@ final class SyncScheduleOnSubscriptionChange {
 	}
 
 	public function on_end_date_updated( EndDateUpdated $event ): void {
-		if ( $event->date ) {
-			$this->schedule->cancel( $event->subscription );
+		$this->schedule->remove_expiration( $event->subscription );
+		$this->schedule->remove_cancellation( $event->subscription );
+
+		if ( ! $event->date ) {
+			return;
 		}
+
+		if ( $event->subscription->is_pending_cancel() ) {
+			$this->schedule->cancel( $event->subscription );
+			return;
+		}
+
+		$this->schedule->schedule_expiration( $event->subscription );
 	}
 
 	public function on_next_payment_date_updated( NextPaymentDateUpdated $event ): void {
@@ -53,7 +63,9 @@ final class SyncScheduleOnSubscriptionChange {
 	}
 
 	public function on_subscription_activated( SubscriptionActivated $event ): void {
+		$this->schedule->remove_cancellation( $event->subscription );
 		$this->schedule->schedule_payment_request( $event->subscription );
+		$this->schedule->schedule_expiration( $event->subscription );
 	}
 
 	public function on_subscription_paused( SubscriptionPaused $event ): void {
@@ -62,10 +74,13 @@ final class SyncScheduleOnSubscriptionChange {
 
 	public function on_subscription_cancelled( SubscriptionCancelled $event ): void {
 		$this->schedule->remove_payment_request( $event->subscription );
+		$this->schedule->remove_expiration( $event->subscription );
 		$this->schedule->cancel( $event->subscription );
 	}
 
 	public function on_subscription_expired( SubscriptionExpired $event ): void {
 		$this->schedule->remove_payment_request( $event->subscription );
+		$this->schedule->remove_expiration( $event->subscription );
+		$this->schedule->remove_cancellation( $event->subscription );
 	}
 }

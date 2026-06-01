@@ -71,6 +71,7 @@ return [
 	Subscription\PaymentRequestProcessor::class,
 	Subscription\AutorecoverPastDueSubscriptions::class,
 	Subscription\SubscriptionScheduledCancel::class,
+	Subscription\SubscriptionScheduledExpire::class,
 	Telemetry\TelemetryData::class,
 	WcQueryFix::class,
 	Api\Order::class,

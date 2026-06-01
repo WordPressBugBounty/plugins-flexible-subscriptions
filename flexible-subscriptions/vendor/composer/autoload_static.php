@@ -150,6 +150,7 @@ class ComposerStaticInitFlexibleSubscriptions
         'WPDesk\\FlexibleSubscriptions\\HookProvider\\Subscription\\AutorecoverPastDueSubscriptions' => __DIR__ . '/../..' . '/src/HookProvider/Subscription/AutorecoverPastDueSubscriptions.php',
         'WPDesk\\FlexibleSubscriptions\\HookProvider\\Subscription\\PaymentRequestProcessor' => __DIR__ . '/../..' . '/src/HookProvider/Subscription/PaymentRequestProcessor.php',
         'WPDesk\\FlexibleSubscriptions\\HookProvider\\Subscription\\SubscriptionScheduledCancel' => __DIR__ . '/../..' . '/src/HookProvider/Subscription/SubscriptionScheduledCancel.php',
+        'WPDesk\\FlexibleSubscriptions\\HookProvider\\Subscription\\SubscriptionScheduledExpire' => __DIR__ . '/../..' . '/src/HookProvider/Subscription/SubscriptionScheduledExpire.php',
         'WPDesk\\FlexibleSubscriptions\\HookProvider\\Telemetry\\TelemetryData' => __DIR__ . '/../..' . '/src/HookProvider/Telemetry/TelemetryData.php',
         'WPDesk\\FlexibleSubscriptions\\HookProvider\\WcQueryFix' => __DIR__ . '/../..' . '/src/HookProvider/WcQueryFix.php',
         'WPDesk\\FlexibleSubscriptions\\HookProvider\\WooCommerceSubscriptionsDetector' => __DIR__ . '/../..' . '/src/HookProvider/WooCommerceSubscriptionsDetector.php',

@@ -9,6 +9,18 @@ use WPDesk\FlexibleSubscriptions\Vendor\Psr\Log\LoggerInterface;
 
 class Schedule {
 
+	private const PAYMENT_REQUEST_ACTION = 'fsub/subscription/payment_request/process';
+
+	private const PAYMENT_REQUEST_GROUP = 'fsb-payment-request';
+
+	private const CANCELLATION_ACTION = 'fsub/subscription/cancel';
+
+	private const CANCELLATION_GROUP = 'fsb-subscription-cancel';
+
+	private const EXPIRATION_ACTION = 'fsub/subscription/expire';
+
+	private const EXPIRATION_GROUP = 'fsb-subscription-expire';
+
 	private LoggerInterface $logger;
 
 	private ClockInterface $clock;
@@ -27,11 +39,11 @@ class Schedule {
 				]
 			);
 			as_unschedule_action(
-				'fsub/subscription/payment_request/process',
+				self::PAYMENT_REQUEST_ACTION,
 				[
 					'subscription' => $subscription->get_id(),
 				],
-				'fsb-payment-request'
+				self::PAYMENT_REQUEST_GROUP
 			);
 		}
 
@@ -101,9 +113,9 @@ class Schedule {
 
 		$scheduled = as_schedule_single_action(
 			$period->getEndDate()->getTimestamp(),
-			'fsub/subscription/payment_request/process',
+			self::PAYMENT_REQUEST_ACTION,
 			[ 'subscription' => $subscription->get_id() ],
-			'fsb-payment-request'
+			self::PAYMENT_REQUEST_GROUP
 		);
 
 		if ( $scheduled !== 0 ) {
@@ -127,21 +139,21 @@ class Schedule {
 
 	public function is_scheduled_payment_request( Subscription $subscription ): bool {
 		return as_has_scheduled_action(
-			'fsub/subscription/payment_request/process',
+			self::PAYMENT_REQUEST_ACTION,
 			[
 				'subscription' => $subscription->get_id(),
 			],
-			'fsb-payment-request'
+			self::PAYMENT_REQUEST_GROUP
 		);
 	}
 
 	public function remove_payment_request( Subscription $subscription ): void {
 		as_unschedule_all_actions(
-			'fsub/subscription/payment_request/process',
+			self::PAYMENT_REQUEST_ACTION,
 			[
 				'subscription' => $subscription->get_id(),
 			],
-			'fsb-payment-request'
+			self::PAYMENT_REQUEST_GROUP
 		);
 	}
 
@@ -157,19 +169,19 @@ class Schedule {
 		if ( $this->is_scheduled_cancel( $subscription ) ) {
 			$this->logger->debug( sprintf( 'Subscription #%d is already scheduled for cancellation, unscheduling...', $subscription->get_id() ) );
 			as_unschedule_action(
-				'fsub/subscription/cancel',
+				self::CANCELLATION_ACTION,
 				[
 					'subscription' => $subscription->get_id(),
 				],
-				'fsb-subscription-cancel'
+				self::CANCELLATION_GROUP
 			);
 		}
 
 		as_schedule_single_action(
 			$subscription->get_end_date()->getTimestamp(),
-			'fsub/subscription/cancel',
+			self::CANCELLATION_ACTION,
 			[ 'subscription' => $subscription->get_id() ],
-			'fsb-subscription-cancel'
+			self::CANCELLATION_GROUP
 		);
 	}
 
@@ -180,21 +192,93 @@ class Schedule {
 
 		$this->logger->debug( 'Removing cancel schedule for subscription #{sid}...', [ 'sid' => $subscription->get_id() ] );
 		return (bool) as_unschedule_action(
-			'fsub/subscription/cancel',
+			self::CANCELLATION_ACTION,
 			[
 				'subscription' => $subscription->get_id(),
 			],
-			'fsb-subscription-cancel'
+			self::CANCELLATION_GROUP
 		);
 	}
 
 	public function is_scheduled_cancel( Subscription $subscription ): bool {
 		return as_has_scheduled_action(
-			'fsub/subscription/cancel',
+			self::CANCELLATION_ACTION,
 			[
 				'subscription' => $subscription->get_id(),
 			],
-			'fsb-subscription-cancel'
+			self::CANCELLATION_GROUP
+		);
+	}
+
+	public function schedule_expiration( Subscription $subscription ): void {
+		if ( ! $subscription->can_be_updated_to( 'expired' ) || ! $subscription->get_end_date() instanceof \DateTimeInterface ) {
+			return;
+		}
+
+		if ( $this->is_scheduled_expiration( $subscription ) ) {
+			$this->logger->debug(
+				'billing.schedule.expiration.replacing',
+				[
+					'subscription_id' => $subscription->get_id(),
+				]
+			);
+			as_unschedule_action(
+				self::EXPIRATION_ACTION,
+				[
+					'subscription' => $subscription->get_id(),
+				],
+				self::EXPIRATION_GROUP
+			);
+		}
+
+		$scheduled = as_schedule_single_action(
+			$subscription->get_end_date()->getTimestamp(),
+			self::EXPIRATION_ACTION,
+			[ 'subscription' => $subscription->get_id() ],
+			self::EXPIRATION_GROUP
+		);
+
+		if ( $scheduled !== 0 ) {
+			$this->logger->debug(
+				'billing.schedule.expiration.completed',
+				[
+					'subscription_id' => $subscription->get_id(),
+					'scheduled_for'   => $subscription->get_end_date()->format( 'c' ),
+				]
+			);
+		} else {
+			$this->logger->warning(
+				'billing.schedule.expiration.failed',
+				[
+					'subscription_id' => $subscription->get_id(),
+					'scheduled_for'   => $subscription->get_end_date()->format( 'c' ),
+				]
+			);
+		}
+	}
+
+	public function remove_expiration( Subscription $subscription ): bool {
+		if ( ! $this->is_scheduled_expiration( $subscription ) ) {
+			return false;
+		}
+
+		$this->logger->debug( 'Removing expiration schedule for subscription #{sid}...', [ 'sid' => $subscription->get_id() ] );
+		return (bool) as_unschedule_action(
+			self::EXPIRATION_ACTION,
+			[
+				'subscription' => $subscription->get_id(),
+			],
+			self::EXPIRATION_GROUP
+		);
+	}
+
+	public function is_scheduled_expiration( Subscription $subscription ): bool {
+		return as_has_scheduled_action(
+			self::EXPIRATION_ACTION,
+			[
+				'subscription' => $subscription->get_id(),
+			],
+			self::EXPIRATION_GROUP
 		);
 	}
 }

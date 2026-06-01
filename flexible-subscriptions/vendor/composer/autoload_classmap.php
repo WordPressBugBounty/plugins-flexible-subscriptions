@@ -127,6 +127,7 @@ return array(
     'WPDesk\\FlexibleSubscriptions\\HookProvider\\Subscription\\AutorecoverPastDueSubscriptions' => $baseDir . '/src/HookProvider/Subscription/AutorecoverPastDueSubscriptions.php',
     'WPDesk\\FlexibleSubscriptions\\HookProvider\\Subscription\\PaymentRequestProcessor' => $baseDir . '/src/HookProvider/Subscription/PaymentRequestProcessor.php',
     'WPDesk\\FlexibleSubscriptions\\HookProvider\\Subscription\\SubscriptionScheduledCancel' => $baseDir . '/src/HookProvider/Subscription/SubscriptionScheduledCancel.php',
+    'WPDesk\\FlexibleSubscriptions\\HookProvider\\Subscription\\SubscriptionScheduledExpire' => $baseDir . '/src/HookProvider/Subscription/SubscriptionScheduledExpire.php',
     'WPDesk\\FlexibleSubscriptions\\HookProvider\\Telemetry\\TelemetryData' => $baseDir . '/src/HookProvider/Telemetry/TelemetryData.php',
     'WPDesk\\FlexibleSubscriptions\\HookProvider\\WcQueryFix' => $baseDir . '/src/HookProvider/WcQueryFix.php',
     'WPDesk\\FlexibleSubscriptions\\HookProvider\\WooCommerceSubscriptionsDetector' => $baseDir . '/src/HookProvider/WooCommerceSubscriptionsDetector.php',

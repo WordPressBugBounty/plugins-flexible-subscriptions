@@ -68,7 +68,7 @@ final class HookMapper implements HookProvider {
 		$cast_subscription = $this->caster->cast_to( WC_Subscription::class, $subscription );
 		$payment_meta      = $this->prepare_payment_meta_for_validation( (array) $post_data, $cast_subscription, $payment_method );
 
-		do_action( 'woocommerce_subscription_validate_payment_meta', $payment_method, $payment_meta );
+		do_action( 'woocommerce_subscription_validate_payment_meta', $payment_method, $payment_meta, $cast_subscription );
 		do_action(
 			'woocommerce_subscription_validate_payment_meta_' . $payment_method,
 			$payment_meta,

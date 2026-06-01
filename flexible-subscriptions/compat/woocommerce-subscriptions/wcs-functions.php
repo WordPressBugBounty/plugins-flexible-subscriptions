@@ -13,8 +13,12 @@ if ( ! function_exists( 'wcs_is_subscription' ) ) {
 	 * @return boolean true if it's an FSB subscription.
 	 */
 	function wcs_is_subscription( $subscription ) {
-		if ( $subscription instanceof Subscription ) {
+		if ( is_a( $subscription, 'WC_Subscription' ) ) {
 			return true;
+		}
+
+		if ( $subscription instanceof Subscription ) {
+			return false;
 		}
 
 		if ( ! is_numeric( $subscription ) || $subscription <= 0 ) {
