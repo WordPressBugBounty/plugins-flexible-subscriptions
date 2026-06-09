@@ -354,6 +354,10 @@ class CustomOrdersTableStore extends OrdersTableDataStore {
 		}
 
 		foreach ( $props_to_save as $meta_key => $prop ) {
+			if ( 'trial_interval' === $prop ) {
+				$prop = 'legacy_trial_interval';
+			}
+
 			$meta_value = $subscription->{"get_$prop"}( 'edit' );
 
 			if ( $meta_value instanceof \DateTimeImmutable ) {

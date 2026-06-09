@@ -6,7 +6,7 @@ Donate link: https://wpdesk.net/sk/flexible-subscriptions-rm-donate
 Requires at least: 6.3
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.7.15
+Stable tag: 1.7.16
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -160,6 +160,9 @@ Please report security bugs found in the source code of the Flexible Subscriptio
 19. Support tab with quick instructions about the plugin.
 
 == Changelog ==
+
+= 1.7.16 - 2026-06-09 =
+* Fixed deprecated warnings
 
 = 1.7.15 - 2026-06-01 =
 * Fixed change the subscription to expired on the subscription end date

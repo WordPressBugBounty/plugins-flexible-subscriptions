@@ -30,6 +30,21 @@ use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Interval\WPInterval;
 class Subscription extends \WC_Order {
 
 	public const OBJECT_TYPE = 'fsb_subscription';
+
+	/**
+	 * Compatibility field assigned by WordPress core when hydrating post-like objects.
+	 *
+	 * @var int
+	 */
+	public $ID = 0;
+
+	/**
+	 * Compatibility field assigned by WordPress core for post filter context.
+	 *
+	 * @var string|null
+	 */
+	public $filter;
+
 	/** @var array<string, array<string, true>> */
 	private const ALLOWED_STATUS_TRANSITIONS = [
 		'pending'        => [
@@ -317,10 +332,11 @@ class Subscription extends \WC_Order {
 			return;
 		}
 
-		$trial_end = $this->to_immutable_date( $this->get_trial_end_date() );
-		if ( ! $trial_end instanceof \DateTimeImmutable && $this->get_trial_interval() instanceof WPInterval ) {
+		$trial_end      = $this->to_immutable_date( $this->get_trial_end_date() );
+		$trial_interval = $this->get_legacy_trial_interval();
+		if ( ! $trial_end instanceof \DateTimeImmutable && $trial_interval instanceof WPInterval ) {
 			// Backward compatibility with trial interval.
-			$trial_end = $start->add( $this->get_trial_interval() );
+			$trial_end = $start->add( $trial_interval );
 		}
 
 		$this->initialize_first_period( $start, $this->get_billing_frequency(), $trial_end, $this->get_expiration() );
@@ -622,6 +638,11 @@ class Subscription extends \WC_Order {
 
 	#[\Deprecated( 'Use get_trial_end_date() instead. Relying on interval is obsolete, when start date cannot be changed.' )]
 	public function get_trial_interval(): ?WPInterval {
+		return $this->get_legacy_trial_interval();
+	}
+
+	/** @internal */
+	public function get_legacy_trial_interval( $context = 'view' ): ?WPInterval {
 		$interval = $this->get_prop( 'trial_interval' );
 
 		if ( $interval instanceof WPInterval ) {
@@ -747,7 +768,7 @@ class Subscription extends \WC_Order {
 	}
 
 	public function has_trial(): bool {
-		return $this->get_trial_interval() !== null || $this->get_prop( 'trial_end_date_utc' );
+		return $this->get_legacy_trial_interval() !== null || $this->get_prop( 'trial_end_date_utc' );
 	}
 
 	/** @internal */
@@ -778,8 +799,9 @@ class Subscription extends \WC_Order {
 			return $end_date;
 		}
 
-		if ( $this->get_start_date() instanceof \DateTimeInterface ) {
-			return $this->get_start_date()->add( $this->get_trial_interval() );
+		$trial_interval = $this->get_legacy_trial_interval();
+		if ( $this->get_start_date() instanceof \DateTimeInterface && $trial_interval instanceof WPInterval ) {
+			return $this->get_start_date()->add( $trial_interval );
 		}
 
 		return null;

@@ -92,6 +92,10 @@ class PostMetaStore extends \WC_Order_Data_Store_CPT implements \WC_Object_Data_
 	#[\Override]
 	final protected function update_post_meta( &$subscription ): void {
 		foreach ( $this->get_props_to_update( $subscription, self::META_TO_PROPS_MAP ) as $meta_key => $prop ) {
+			if ( 'trial_interval' === $prop ) {
+				$prop = 'legacy_trial_interval';
+			}
+
 			// @phpstan-ignore method.dynamicName
 			$meta_value = $subscription->{"get_$prop"}( 'edit' );
 
