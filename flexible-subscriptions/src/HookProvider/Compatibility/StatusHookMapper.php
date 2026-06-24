@@ -29,7 +29,7 @@ final class StatusHookMapper implements HookProvider {
 	 * @param string $new_status
 	 * @param string|null $previous_status
 	 */
-	public function map_status_hooks( Subscription $subscription, string $new_status, ?string $previous_status ): void {
+	public function map_status_hooks( Subscription $subscription, string $new_status = '', ?string $previous_status = null ): void {
 		if ( '' !== $new_status ) {
 			do_action( "woocommerce_subscription_status_{$new_status}", $this->caster->cast_to( WC_Subscription::class, $subscription ) );
 		}

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WPDesk\FlexibleSubscriptions\Integration;
 
 use WPDesk\FlexibleSubscriptions\Subscription\Renewal\RequestPaymentStrategy;
+use WPDesk\FlexibleSubscriptions\Subscription\Schedule;
 use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionFinder;
 use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionFinderInterface;
 use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionUpdater;
@@ -41,5 +42,9 @@ final class FlexibleSubscriptions {
 
 	public function subscription_updater(): SubscriptionUpdater {
 		return $this->container->get( SubscriptionUpdater::class );
+	}
+
+	public function schedule(): Schedule {
+		return $this->container->get( Schedule::class );
 	}
 }

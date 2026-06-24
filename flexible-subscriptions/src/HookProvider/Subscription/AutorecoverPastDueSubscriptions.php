@@ -16,7 +16,7 @@ use WPDesk\FlexibleSubscriptions\Vendor\Psr\Log\LoggerInterface;
  * Attempt to recover subscriptions with a next payment date set in the past.
  *
  * This can happen if the renewal payment succeeds without advancing the billing period,
- * which may lead to scheduling an immediate extra renewal order.
+ * leaving the subscription active with a stale next payment date.
  */
 final class AutorecoverPastDueSubscriptions implements HookProvider {
 
@@ -118,7 +118,7 @@ final class AutorecoverPastDueSubscriptions implements HookProvider {
 			return;
 		}
 
-		$renewal = Renewal::from_order( $payment_request );
+		$renewal = $this->hydrate_recoverable_renewal( $subscription, $payment_request );
 		if ( ! $renewal instanceof Renewal ) {
 			$this->log_anomaly( $subscription, $current_period_end, $payment_request_id, 'payment_request_not_renewal' );
 			return;
@@ -131,6 +131,7 @@ final class AutorecoverPastDueSubscriptions implements HookProvider {
 
 		$was_period_advanced = $renewal->is_period_advanced();
 		$this->process_paid_renewal->execute( $renewal );
+		$this->recover_remaining_past_due_state( $subscription, $renewal );
 
 		if ( ! $was_period_advanced && $renewal->is_period_advanced() ) {
 			$this->logger->info(
@@ -144,6 +145,73 @@ final class AutorecoverPastDueSubscriptions implements HookProvider {
 				]
 			);
 		}
+	}
+
+	private function hydrate_recoverable_renewal( Subscription $subscription, \WC_Order $payment_request ): ?Renewal {
+		$renewal = Renewal::from_order( $payment_request );
+		if ( $renewal instanceof Renewal ) {
+			return $renewal;
+		}
+
+		if ( ! $this->is_legacy_renewal_candidate( $subscription, $payment_request ) ) {
+			return null;
+		}
+
+		$updated = false;
+		if ( $payment_request->get_meta( Renewal::META_ORDER_TYPE, true ) !== Renewal::ORDER_TYPE_VALUE ) {
+			$payment_request->update_meta_data( Renewal::META_ORDER_TYPE, Renewal::ORDER_TYPE_VALUE );
+			$updated = true;
+		}
+
+		if ( (int) $payment_request->get_meta( Renewal::META_SUBSCRIPTION_ID, true ) !== $subscription->get_id() ) {
+			$payment_request->update_meta_data( Renewal::META_SUBSCRIPTION_ID, (string) $subscription->get_id() );
+			$updated = true;
+		}
+
+		if ( $updated ) {
+			$payment_request->save();
+			$this->logger->info(
+				'billing.reconcile.legacy_renewal_backfilled',
+				[
+					'subscription_id'    => $subscription->get_id(),
+					'payment_request_id' => $payment_request->get_id(),
+					'reconciler_action'  => 'backfill_renewal_meta',
+				]
+			);
+		}
+
+		return Renewal::from_order( $payment_request );
+	}
+
+	private function is_legacy_renewal_candidate( Subscription $subscription, \WC_Order $payment_request ): bool {
+		if ( (int) $payment_request->get_parent_id() !== $subscription->get_id() ) {
+			return false;
+		}
+
+		return $payment_request->get_created_via( 'edit' ) === 'subscription';
+	}
+
+	private function recover_remaining_past_due_state( Subscription $subscription, Renewal $renewal ): void {
+		$refreshed = $this->finder->find( $subscription->get_id() );
+		if ( ! $refreshed instanceof Subscription ) {
+			return;
+		}
+
+		$current_period_end = $refreshed->get_current_period_end();
+		if ( ! $current_period_end instanceof \DateTimeInterface ) {
+			return;
+		}
+
+		if ( $current_period_end > $this->clock->now() ) {
+			$this->restore_missing_schedule( $refreshed, $current_period_end );
+			return;
+		}
+
+		if ( ! $renewal->is_period_advanced() ) {
+			return;
+		}
+
+		$this->log_anomaly( $refreshed, $current_period_end, $renewal->get_id(), 'subscription_still_past_due_after_recovery' );
 	}
 
 	private function restore_missing_schedule( Subscription $subscription, \DateTimeInterface $current_period_end ): void {

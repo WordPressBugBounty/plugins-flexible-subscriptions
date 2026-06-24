@@ -13,7 +13,7 @@ use WPDesk\FlexibleSubscriptions\Utils\HookProvider;
  */
 final class RenewalMetaBackfill implements HookProvider {
 
-	private const OPTION_KEY   = 'fsb_backfill_subscription_renewal_meta_1_6_12';
+	private const OPTION_KEY   = 'fsb_backfill_subscription_renewal_meta_1_7_17';
 	private const ACTION_HOOK  = 'fsb/backfill_subscription_renewal_meta';
 	private const ACTION_GROUP = 'flexible-subscriptions';
 	private const BATCH_LIMIT  = 50;
@@ -33,59 +33,110 @@ final class RenewalMetaBackfill implements HookProvider {
 		}
 
 		as_enqueue_async_action( self::ACTION_HOOK, [], self::ACTION_GROUP );
-		update_option( self::OPTION_KEY, 'queued' );
+		update_option(
+			self::OPTION_KEY,
+			[
+				'status' => 'queued',
+				'offset' => 0,
+			]
+		);
 	}
 
 	public function run_backfill(): void {
-		// phpcs:disable Universal.Arrays
-		$orders = wc_get_orders(
+		$state            = get_option( self::OPTION_KEY, [] );
+		$offset           = is_array( $state ) ? max( 0, (int) ( $state['offset'] ?? 0 ) ) : 0;
+		$subscription_ids = wc_get_orders(
 			[
-				'limit'      => self::BATCH_LIMIT,
+				'type'       => 'fsb_subscription',
 				'status'     => 'any',
-				'type'       => 'shop_order',
-				'meta_query' => [
-					'relation' => 'AND',
-					[
-						'key'     => Renewal::META_ORDER_TYPE,
-						'value'   => Renewal::ORDER_TYPE_VALUE,
-						'compare' => '=',
-					],
-					[
-						'key'     => Renewal::META_SUBSCRIPTION_ID,
-						'compare' => 'NOT EXISTS',
-					],
-				],
+				'limit'      => self::BATCH_LIMIT,
+				'offset'     => $offset,
+				'orderby'    => 'ID',
+				'order'      => 'ASC',
+				'return'     => 'ids',
 			]
 		);
-		// phpcs:enable Universal.Arrays
 
-		if ( empty( $orders ) ) {
-			update_option( self::OPTION_KEY, 'completed' );
+		if ( empty( $subscription_ids ) ) {
+			update_option(
+				self::OPTION_KEY,
+				[
+					'status' => 'completed',
+					'offset' => $offset,
+				]
+			);
 			return;
 		}
 
-		foreach ( $orders as $order ) {
-			if ( ! $order instanceof WC_Order ) {
-				continue;
+		foreach ( $subscription_ids as $subscription_id ) {
+			// phpcs:disable Universal.Arrays
+			$orders = wc_get_orders(
+				[
+					'limit'      => -1,
+					'status'     => 'any',
+					'type'       => 'shop_order',
+					'parent'     => (int) $subscription_id,
+					'meta_query' => [
+						'relation' => 'OR',
+						[
+							'key'     => Renewal::META_ORDER_TYPE,
+							'compare' => 'NOT EXISTS',
+						],
+						[
+							'key'     => Renewal::META_SUBSCRIPTION_ID,
+							'compare' => 'NOT EXISTS',
+						],
+					],
+				]
+			);
+			// phpcs:enable Universal.Arrays
+
+			foreach ( $orders as $order ) {
+				if ( ! $order instanceof WC_Order ) {
+					continue;
+				}
+
+				if ( $order->get_created_via( 'edit' ) !== 'subscription' ) {
+					continue;
+				}
+
+				$updated = false;
+				if ( $order->get_meta( Renewal::META_ORDER_TYPE, true ) !== Renewal::ORDER_TYPE_VALUE ) {
+					$order->update_meta_data( Renewal::META_ORDER_TYPE, Renewal::ORDER_TYPE_VALUE );
+					$updated = true;
+				}
+
+				if ( (int) $order->get_meta( Renewal::META_SUBSCRIPTION_ID, true ) !== (int) $subscription_id ) {
+					$order->update_meta_data( Renewal::META_SUBSCRIPTION_ID, (string) $subscription_id );
+					$updated = true;
+				}
+
+				if ( $updated ) {
+					$order->save();
+				}
 			}
-
-			$subscription_id = $order->get_parent_id();
-
-			if ( ! $subscription_id ) {
-				continue;
-			}
-
-			$order->add_meta_data( Renewal::META_SUBSCRIPTION_ID, $subscription_id, false );
-			$order->save();
 		}
 
-		if ( count( $orders ) < self::BATCH_LIMIT ) {
-			update_option( self::OPTION_KEY, 'completed' );
+		$next_offset = $offset + count( $subscription_ids );
+		if ( count( $subscription_ids ) < self::BATCH_LIMIT ) {
+			update_option(
+				self::OPTION_KEY,
+				[
+					'status' => 'completed',
+					'offset' => $next_offset,
+				]
+			);
 			return;
 		}
 
-		if ( function_exists( 'as_enqueue_async_action' ) ) {
-			as_enqueue_async_action( self::ACTION_HOOK, [], self::ACTION_GROUP );
-		}
+		update_option(
+			self::OPTION_KEY,
+			[
+				'status' => 'queued',
+				'offset' => $next_offset,
+			]
+		);
+
+		as_enqueue_async_action( self::ACTION_HOOK, [], self::ACTION_GROUP );
 	}
 }
