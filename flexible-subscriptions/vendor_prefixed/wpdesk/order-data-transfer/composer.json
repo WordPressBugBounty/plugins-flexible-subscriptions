@@ -9,7 +9,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "WPDesk\\FlexibleSubscriptions\\Vendor\\WPDesk\\LibraryTemplate\\": "src\/"
+            "WPDesk\\FlexibleSubscriptions\\Vendor\\WPDesk\\OrderDataTransfer\\": "src\/"
         }
     },
     "authors": [

@@ -51,6 +51,7 @@ return [
 	Checkout\OrderRelatedSubscriptionsDetails::class,
 	Checkout\SubscriptionCheckout::class,
 	Checkout\RecurringShippingOptions::class,
+	Compatibility\FlexibleShippingSubscriptionsSupport::class,
 	Compatibility\HookMapper::class,
 	Compatibility\StatusHookMapper::class,
 	Coupons\SubscriptionCouponTypes::class,

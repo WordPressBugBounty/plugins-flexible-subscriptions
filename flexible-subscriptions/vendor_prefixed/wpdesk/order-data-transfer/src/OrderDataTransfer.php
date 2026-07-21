@@ -18,7 +18,14 @@ class OrderDataTransfer
      * @param \WC_Order $from
      * @param \WC_Order|null $to If null, a new order will be created.
      */
-    public function copy(\WC_Order $from, ?\WC_Order $to = null): \WC_Order
+    /**
+     * @param array{
+     *     excluded_meta_keys?: string[],
+     *     excluded_meta_keys_filter?: callable(string[], \WC_Order, \WC_Order): string[],
+     *     data_filter?: callable(array<string, mixed>, \WC_Order, \WC_Order): array<string, mixed>
+     * } $options
+     */
+    public function copy(\WC_Order $from, ?\WC_Order $to = null, array $options = []): \WC_Order
     {
         if ($to === null) {
             $to = $this->create_order();
@@ -30,16 +37,11 @@ class OrderDataTransfer
         // Payment token meta isn't accounted from in the above methods, so we need to add it separately.
         if (!isset($data['_payment_tokens'])) {
             $tokens = $from->get_payment_tokens();
-            // @phpstan-ignore empty.notAllowed
             if (!empty($tokens)) {
                 $data['_payment_tokens'] = $tokens;
             }
         }
-        // Remove any excluded meta keys.
-        $data = array_filter($data, fn($key) => !in_array($key, self::EXCLUDED_META_KEYS, \true), \ARRAY_FILTER_USE_KEY);
-        foreach ($data as $key => $value) {
-            $this->set_data($to, $key, maybe_unserialize($value));
-        }
+        $this->copy_data($data, $from, $to, $options);
         foreach ($from->get_items(['line_item', 'fee', 'tax', 'shipping', 'coupon']) as $item) {
             $item_copy = $this->create_item_clone($item, $to);
             $this->copy_item_data($item, $item_copy);
@@ -47,6 +49,18 @@ class OrderDataTransfer
         }
         $to->save();
         return $to;
+    }
+    /**
+     * Copies custom meta only. This is useful when the destination is a WC order
+     * subtype whose core order data must be managed by its owner.
+     *
+     * @param string[] $excluded_meta_keys
+     * @param callable(array<string, mixed>, \WC_Order, \WC_Order): array<string, mixed>|null $data_filter
+     * @param callable(string[], \WC_Order, \WC_Order): string[]|null $excluded_meta_keys_filter
+     */
+    public function copy_meta_data(\WC_Order $from, \WC_Order $to, array $excluded_meta_keys = [], ?callable $data_filter = null, ?callable $excluded_meta_keys_filter = null): void
+    {
+        $this->copy_data($this->get_meta_data($from), $from, $to, ['excluded_meta_keys' => $excluded_meta_keys, 'excluded_meta_keys_filter' => $excluded_meta_keys_filter, 'data_filter' => $data_filter]);
     }
     public function copy_item_data(\WC_Order_Item $from, \WC_Order_Item $to): void
     {
@@ -83,6 +97,28 @@ class OrderDataTransfer
                 /** @var \WC_Order_Item_Coupon $from */
                 $to->set_props(['discount' => $from->get_discount(), 'discount_tax' => $from->get_discount_tax()]);
                 break;
+        }
+    }
+    /**
+     * @param array<string, mixed> $data
+     * @param array{
+     *     excluded_meta_keys?: string[],
+     *     excluded_meta_keys_filter?: callable(string[], \WC_Order, \WC_Order): string[],
+     *     data_filter?: callable(array<string, mixed>, \WC_Order, \WC_Order): array<string, mixed>
+     * } $options
+     */
+    private function copy_data(array $data, \WC_Order $from, \WC_Order $to, array $options): void
+    {
+        $excluded_meta_keys = array_merge(self::EXCLUDED_META_KEYS, $options['excluded_meta_keys'] ?? []);
+        if (isset($options['excluded_meta_keys_filter'])) {
+            $excluded_meta_keys = $options['excluded_meta_keys_filter']($excluded_meta_keys, $to, $from);
+        }
+        $data = array_filter($data, static fn(string $key): bool => !in_array($key, $excluded_meta_keys, \true), \ARRAY_FILTER_USE_KEY);
+        if (isset($options['data_filter'])) {
+            $data = $options['data_filter']($data, $to, $from);
+        }
+        foreach ($data as $key => $value) {
+            $this->set_data($to, $key, maybe_unserialize($value));
         }
     }
     private function create_order(): \WC_Order
@@ -127,20 +163,38 @@ class OrderDataTransfer
     /**
      * Gets the "from" object's meta data.
      *
-     * @return string[] The meta data.
+     * @return array<string, mixed> The meta data.
      */
     private function get_meta_data(\WC_Order $source): array
     {
         $meta_data = [];
         foreach ($source->get_meta_data() as $meta) {
-            $meta_data[$meta->key] = $meta->value;
+            $normalized_meta = $this->normalize_meta_data($meta);
+            if ($normalized_meta === null) {
+                continue;
+            }
+            $meta_data[$normalized_meta['key']] = $normalized_meta['value'];
         }
         return $meta_data;
     }
     /**
+     * @param mixed $meta
+     * @return array{key: string, value: mixed}|null
+     */
+    private function normalize_meta_data($meta): ?array
+    {
+        if (is_object($meta) && isset($meta->key)) {
+            return ['key' => (string) $meta->key, 'value' => $meta->value ?? null];
+        }
+        if (is_array($meta) && isset($meta['key'])) {
+            return ['key' => (string) $meta['key'], 'value' => $meta['value'] ?? null];
+        }
+        return null;
+    }
+    /**
      * Gets the "from" object's operational data that was previously stored in wp post meta.
      *
-     * @return string[] The operational data with the legacy meta key.
+     * @return array<string, mixed> The operational data with the legacy meta key.
      */
     private function get_operational_data(\WC_Order $source): array
     {
@@ -149,7 +203,7 @@ class OrderDataTransfer
     /**
      * Gets the "from" object's core data that was previously stored in wp post meta.
      *
-     * @return string[] The core data with the legacy meta keys.
+     * @return array<string, mixed> The core data with the legacy meta keys.
      */
     private function get_order_data(\WC_Order $source): array
     {
@@ -158,10 +212,10 @@ class OrderDataTransfer
     /**
      * Gets the "from" object's address data that was previously stored in wp post meta.
      *
-     * @return string[] The address data with the legacy meta keys.
+     * @return array<string, mixed> The address data with the legacy meta keys.
      */
     private function get_address_data(\WC_Order $source): array
     {
-        return array_filter(['_billing_first_name' => $source->get_billing_first_name('edit'), '_billing_last_name' => $source->get_billing_last_name('edit'), '_billing_company' => $source->get_billing_company('edit'), '_billing_address_1' => $source->get_billing_address_1('edit'), '_billing_address_2' => $source->get_billing_address_2('edit'), '_billing_city' => $source->get_billing_city('edit'), '_billing_state' => $source->get_billing_state('edit'), '_billing_postcode' => $source->get_billing_postcode('edit'), '_billing_country' => $source->get_billing_country('edit'), '_billing_email' => $source->get_billing_email('edit'), '_billing_phone' => $source->get_billing_phone('edit'), '_shipping_first_name' => $source->get_shipping_first_name('edit'), '_shipping_last_name' => $source->get_shipping_last_name('edit'), '_shipping_company' => $source->get_shipping_company('edit'), '_shipping_address_1' => $source->get_shipping_address_1('edit'), '_shipping_address_2' => $source->get_shipping_address_2('edit'), '_shipping_city' => $source->get_shipping_city('edit'), '_shipping_state' => $source->get_shipping_state('edit'), '_shipping_postcode' => $source->get_shipping_postcode('edit'), '_shipping_country' => $source->get_shipping_country('edit'), '_shipping_phone' => $source->get_shipping_phone('edit')]);
+        return array_filter(['_billing_first_name' => $source->get_billing_first_name('edit'), '_billing_last_name' => $source->get_billing_last_name('edit'), '_billing_company' => $source->get_billing_company('edit'), '_billing_address_1' => $source->get_billing_address_1('edit'), '_billing_address_2' => $source->get_billing_address_2('edit'), '_billing_city' => $source->get_billing_city('edit'), '_billing_state' => $source->get_billing_state('edit'), '_billing_postcode' => $source->get_billing_postcode('edit'), '_billing_country' => $source->get_billing_country('edit'), '_billing_email' => $source->get_billing_email('edit'), '_billing_phone' => $source->get_billing_phone('edit'), '_shipping_first_name' => $source->get_shipping_first_name('edit'), '_shipping_last_name' => $source->get_shipping_last_name('edit'), '_shipping_company' => $source->get_shipping_company('edit'), '_shipping_address_1' => $source->get_shipping_address_1('edit'), '_shipping_address_2' => $source->get_shipping_address_2('edit'), '_shipping_city' => $source->get_shipping_city('edit'), '_shipping_state' => $source->get_shipping_state('edit'), '_shipping_postcode' => $source->get_shipping_postcode('edit'), '_shipping_country' => $source->get_shipping_country('edit'), '_shipping_phone' => $source->get_shipping_phone('edit')], static fn($value): bool => (bool) $value);
     }
 }

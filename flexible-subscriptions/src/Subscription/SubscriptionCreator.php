@@ -19,9 +19,12 @@ class SubscriptionCreator {
 
 	private CartContext $cart_context;
 
-	public function __construct( PaymentMethodSeeker $gateway_seeker, CartContext $cart_context ) {
-		$this->gateway_seeker = $gateway_seeker;
-		$this->cart_context   = $cart_context;
+	private OrderDataCopier $order_data_copier;
+
+	public function __construct( PaymentMethodSeeker $gateway_seeker, CartContext $cart_context, OrderDataCopier $order_data_copier ) {
+		$this->gateway_seeker    = $gateway_seeker;
+		$this->cart_context      = $cart_context;
+		$this->order_data_copier = $order_data_copier;
 	}
 
 	public function build_subscription( \WC_Order $order, SubscriptionCandidateInterface $candidate ): Subscription {
@@ -67,6 +70,7 @@ class SubscriptionCreator {
 		$candidate_strategy->add_auxiliary_lines( $subscription, $order );
 
 		$candidate_strategy->apply_totals( $subscription );
+		$this->order_data_copier->copy_subscription_meta( $order, $subscription );
 
 		$subscription->save();
 

@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace WPDesk\FlexibleSubscriptions\Subscription\Renewal;
 
+use WPDesk\FlexibleSubscriptions\Subscription\OrderDataCopier;
 use WPDesk\FlexibleSubscriptions\Subscription\Subscription;
-use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\OrderDataTransfer\OrderDataTransfer;
 
 /**
  * Factory for creating new Renewal domain objects.
  */
 final class RenewalFactory {
 
-	private OrderDataTransfer $order_transfer;
+	private OrderDataCopier $order_data_copier;
 
-	public function __construct( OrderDataTransfer $order_transfer ) {
-		$this->order_transfer = $order_transfer;
+	public function __construct( OrderDataCopier $order_data_copier ) {
+		$this->order_data_copier = $order_data_copier;
 	}
 
 	/**
@@ -33,7 +33,7 @@ final class RenewalFactory {
 
 		assert( $order instanceof \WC_Order );
 
-		$this->order_transfer->copy( $subscription, $order );
+		$this->order_data_copier->copy_renewal_data( $subscription, $order );
 
 		if ( ! $subscription->is_manual() ) {
 			$order->set_payment_method( $subscription->get_payment_method() );

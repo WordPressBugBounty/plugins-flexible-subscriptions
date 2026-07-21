@@ -9,11 +9,11 @@ use WPDesk\FlexibleSubscriptions\Vendor\Psr\Log\LoggerInterface;
 
 class Schedule {
 
+
 	private const PAYMENT_REQUEST_ACTION = 'fsub/subscription/payment_request/process';
 
 	private const PAYMENT_REQUEST_GROUP = 'fsb-payment-request';
-
-	private const CANCELLATION_ACTION = 'fsub/subscription/cancel';
+	private const CANCELLATION_ACTION   = 'fsub/subscription/cancel';
 
 	private const CANCELLATION_GROUP = 'fsb-subscription-cancel';
 

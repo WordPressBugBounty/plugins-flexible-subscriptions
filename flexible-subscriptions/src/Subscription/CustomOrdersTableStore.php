@@ -433,7 +433,7 @@ class CustomOrdersTableStore extends OrdersTableDataStore {
 		$subscription->set_object_read( false );
 
 		// Set subscription specific properties that we store in meta.
-		$meta_data    = $this->get_subscription_meta_data( $subscription, $subscription_data );
+		$meta_data = $this->get_subscription_meta_data( $subscription, $subscription_data );
 		if ( empty( $meta_data ) ) {
 			$subscription->set_object_read( true );
 			return;

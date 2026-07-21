@@ -31,6 +31,7 @@
 		"gitlab-domains": ["gitlab.wpdesk.dev"]
 	},
 	"prefer-stable": true,
+	"minimum-stability": "stable",
 	"require": {
 		"php": ">=7.4|^8",
 		"psr/log": "^1.1.4",
@@ -41,13 +42,13 @@
 		"phpunit/phpunit": "<10",
 		"psr/event-dispatcher": "^1.0",
 		"woocommerce/action-scheduler": "*",
-		"wpdesk/order-data-transfer": "^1.0",
+		"wpdesk/order-data-transfer": "^1.1",
 		"wpdesk/php-di": "^6.3",
 		"wpdesk/phpstan-rules": "^1.1",
 		"wpdesk/wp-basic-requirements": "^3.6",
 		"wpdesk/wp-clock": "^1.0",
 		"wpdesk/wp-code-sniffer": "^1",
-		"wpdesk/wp-codeception": "^2.11",
+		"wpdesk/wp-codeception": "^3",
 		"wpdesk/wp-format": "^1.0",
 		"wpdesk/wp-forms": "^3",
 		"wpdesk/wp-init": "0.10.*",
@@ -84,6 +85,6 @@
 			"url": "https://gitlab.wpdesk.dev/api/v4/group/wpdesk/-/packages/composer/"
 		}
 	},
-	"version": "1.7.18",
+	"version": "1.7.19",
 	"type": "wordpress-plugin"
 }

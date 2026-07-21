@@ -34,4 +34,32 @@ class WC_Subscriptions_Manager {
 			}
 		}
 	}
+
+	/**
+	 * Mark subscriptions related to an order as failed.
+	 *
+	 * WCS-compatible gateways call this method when a renewal or parent order
+	 * payment fails. Flexible Subscriptions mirrors that behavior by delegating
+	 * failure handling to each related compat subscription object.
+	 *
+	 * @param WC_Order|int $order The order or order ID.
+	 * @param string $new_status The target subscription status after failure.
+	 */
+	public static function process_subscription_payment_failure_on_order( $order, $new_status = 'on-hold' ) {
+		if ( ! $order instanceof \WC_Order ) {
+			$order = wc_get_order( $order );
+		}
+
+		if ( ! $order ) {
+			return;
+		}
+
+		$subscriptions = wcs_get_subscriptions_for_order( $order );
+
+		foreach ( $subscriptions as $subscription ) {
+			if ( $subscription instanceof \WC_Subscription ) {
+				$subscription->payment_failed( $new_status );
+			}
+		}
+	}
 }
