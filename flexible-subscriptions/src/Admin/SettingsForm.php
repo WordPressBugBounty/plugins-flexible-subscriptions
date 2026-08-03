@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace WPDesk\FlexibleSubscriptions\Admin;
 
 use WPDesk\FlexibleSubscriptions\Admin\Settings\AccountTab;
+use WPDesk\FlexibleSubscriptions\Admin\Settings\PaymentsTab;
 use WPDesk\FlexibleSubscriptions\Admin\Settings\ProductsTab;
 use WPDesk\FlexibleSubscriptions\Form\ExtendedForm;
 use WPDesk\FlexibleSubscriptions\Form\Fields\ActionField;
@@ -34,6 +35,9 @@ class SettingsForm extends ExtendedForm {
 				( new ProductsTab() )
 					->set_name( 'product' )
 					->set_label( esc_html__( 'Products', 'flexible-subscriptions' ) ),
+				( new PaymentsTab() )
+					->set_name( 'payment' )
+					->set_label( esc_html__( 'Payments', 'flexible-subscriptions' ) ),
 				( new AccountTab() )
 					->set_name( 'account' )
 					->set_label( esc_html__( 'Account', 'flexible-subscriptions' ) ),

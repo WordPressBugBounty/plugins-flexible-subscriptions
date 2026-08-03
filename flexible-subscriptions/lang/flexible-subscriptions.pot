@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Flexible Subscriptions 1.7.19\n"
+"Project-Id-Version: Flexible Subscriptions 1.8.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/flexible-subscriptions\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-21T13:01:14+00:00\n"
+"POT-Creation-Date: 2026-08-03T13:32:18+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: flexible-subscriptions\n"
@@ -106,8 +106,40 @@ msgid ""
 ""
 msgstr ""
 
+#: src/Admin/Settings/PaymentsTab.php:25
+msgid "Zero initial payment"
+msgstr ""
+
+#: src/Admin/Settings/PaymentsTab.php:26
+msgid "Require a payment method when the initial subscription order total is zero"
+msgstr ""
+
+#: src/Admin/Settings/PaymentsTab.php:27
+msgid "Allows a supported payment gateway to save the payment method for automatic renewals when a future subscription payment is due."
+msgstr ""
+
+#: src/Admin/Settings/PaymentsTab.php:31
+msgid "Manual payments"
+msgstr ""
+
+#: src/Admin/Settings/PaymentsTab.php:32
+msgid "Allow payment methods that require manual subscription renewals"
+msgstr ""
+
+#: src/Admin/Settings/PaymentsTab.php:33
+msgid "When disabled, only payment gateways supporting automatic subscription renewals are available during checkout."
+msgstr ""
+
+#: src/Admin/Settings/PaymentsTab.php:36
+msgid "Payment options"
+msgstr ""
+
+#: src/Admin/Settings/PaymentsTab.php:37
+msgid "Configure how payment methods are collected and which gateways can be used for subscriptions."
+msgstr ""
+
 #: src/Admin/Settings/ProductsTab.php:21
-#: src/Admin/SettingsForm.php:36
+#: src/Admin/SettingsForm.php:37
 msgid "Products"
 msgstr ""
 
@@ -134,11 +166,15 @@ msgstr ""
 msgid "At your store, buttons are labeled with regular products in mind (i.e. \"Add to cart\", \"Place order\"). By default, a subscription changes this to more appropiate labels, like \"Sign up now\" or \"Subscribe now\". You can customise the button text for subscriptions here."
 msgstr ""
 
-#: src/Admin/SettingsForm.php:39
+#: src/Admin/SettingsForm.php:40
+msgid "Payments"
+msgstr ""
+
+#: src/Admin/SettingsForm.php:43
 msgid "Account"
 msgstr ""
 
-#: src/Admin/SettingsForm.php:50
+#: src/Admin/SettingsForm.php:54
 msgid "Save changes"
 msgstr ""
 
@@ -541,43 +577,43 @@ msgstr ""
 msgid "This product is not a type of subscription product and therefore cannot be added to a subscription."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:87
+#: src/HookProvider/Blocks/ExtendStoreApi.php:91
 msgid "Billing period for the subscription."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:92
+#: src/HookProvider/Blocks/ExtendStoreApi.php:96
 msgid "The number of billing periods between subscription renewals."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:97
+#: src/HookProvider/Blocks/ExtendStoreApi.php:101
 msgid "Subscription Product trial length."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:102
+#: src/HookProvider/Blocks/ExtendStoreApi.php:106
 msgid "Subscription Product trial period."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:107
+#: src/HookProvider/Blocks/ExtendStoreApi.php:111
 msgid "Subscription Product sign-up fee."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:170
+#: src/HookProvider/Blocks/ExtendStoreApi.php:174
 msgid "A list of recurring totals for subscriptions in the cart."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:178
+#: src/HookProvider/Blocks/ExtendStoreApi.php:182
 msgid "Localized first renewal date for the subscription."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:183
+#: src/HookProvider/Blocks/ExtendStoreApi.php:187
 msgid "Human-readable billing frequency for the subscription."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:188
+#: src/HookProvider/Blocks/ExtendStoreApi.php:192
 msgid "Human-readable expiration for the subscription."
 msgstr ""
 
-#: src/HookProvider/Blocks/ExtendStoreApi.php:194
+#: src/HookProvider/Blocks/ExtendStoreApi.php:198
 msgid "Recurring shipping packages with rates."
 msgstr ""
 
@@ -602,12 +638,12 @@ msgid "Recurring Product % Discount"
 msgstr ""
 
 #. translators: 1-2: opening/closing tags - link to documentation.
-#: src/HookProvider/Gateways/AvailableGateways.php:61
+#: src/HookProvider/Gateways/AvailableGateways.php:69
 #, php-format
 msgid "Sorry, it seems there are no available payment methods which support subscriptions. Please see %1$sEnabling Payment Gateways for Subscriptions%2$s if you require assistance."
 msgstr ""
 
-#: src/HookProvider/Gateways/AvailableGateways.php:63
+#: src/HookProvider/Gateways/AvailableGateways.php:71
 msgid "Sorry, it seems there are no available payment methods which support subscriptions. Please contact us if you require assistance or wish to make alternate arrangements."
 msgstr ""
 
@@ -775,7 +811,7 @@ msgstr ""
 msgid "Shipment every %s"
 msgstr ""
 
-#: src/Subscription/Renewal/ManualRenewal.php:13
+#: src/Subscription/Renewal/ManualRenewal.php:20
 msgid "Manual renewal order awaiting customer payment."
 msgstr ""
 

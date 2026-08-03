@@ -45,6 +45,19 @@ final class ProcessPaidRenewal {
 			return;
 		}
 
+		if ( $subscription->is_finalized() ) {
+			$this->logger->warning(
+				'billing.renewal.process_paid.skipped',
+				[
+					'subscription_id'    => $subscription->get_id(),
+					'renewal_id'         => $renewal->get_id(),
+					'payment_request_id' => $renewal->get_id(),
+					'skip_reason'        => LifecycleSkipReason::SUBSCRIPTION_FINALIZED,
+				]
+			);
+			return;
+		}
+
 		if ( $old_status === 'failed' ) {
 			do_action( 'fsub/subscription/payment_request/updated_failing_payment_method', $subscription, $renewal );
 		}

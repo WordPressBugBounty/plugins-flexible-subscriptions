@@ -5,14 +5,18 @@ declare(strict_types=1);
 namespace WPDesk\FlexibleSubscriptions\HookProvider\Gateways;
 
 use WPDesk\FlexibleSubscriptions\Cart\SubscriptionCandidatesList;
+use WPDesk\FlexibleSubscriptions\Settings\PaymentOptions;
 use WPDesk\FlexibleSubscriptions\Utils\HookProvider;
 
 class AvailableGateways implements HookProvider {
 
 	private SubscriptionCandidatesList $candidates;
 
-	public function __construct( SubscriptionCandidatesList $candidates ) {
-		$this->candidates = $candidates;
+	private PaymentOptions $payment_options;
+
+	public function __construct( SubscriptionCandidatesList $candidates, PaymentOptions $payment_options ) {
+		$this->candidates      = $candidates;
+		$this->payment_options = $payment_options;
 	}
 
 	public function hooks(): void {
@@ -31,7 +35,12 @@ class AvailableGateways implements HookProvider {
 			unset( $gateways[ WooPaymentsIncompatibility::WOOCOMMERCE_PAYMENTS_ID ] );
 		}
 
-		if ( apply_filters( 'fsub/payment/manual_renewal/enabled', true ) ) {
+		if (
+			apply_filters(
+				'fsub/payment/manual_renewal/enabled',
+				$this->payment_options->manual_renewal_enabled()
+			)
+		) {
 			return $gateways;
 		}
 
@@ -55,13 +64,11 @@ class AvailableGateways implements HookProvider {
 	 * @return string
 	 */
 	public function no_available_payment_methods_message( $message ): string {
-		if ( true ) {
-			if ( current_user_can( 'manage_woocommerce' ) ) {
-				// translators: 1-2: opening/closing tags - link to documentation.
-				$no_gateways_message = sprintf( __( 'Sorry, it seems there are no available payment methods which support subscriptions. Please see %1$sEnabling Payment Gateways for Subscriptions%2$s if you require assistance.', 'flexible-subscriptions' ), '<a href="https://docs.woocommerce.com/document/subscriptions/enabling-payment-gateways-for-subscriptions/">', '</a>' );
-			} else {
-				$no_gateways_message = __( 'Sorry, it seems there are no available payment methods which support subscriptions. Please contact us if you require assistance or wish to make alternate arrangements.', 'flexible-subscriptions' );
-			}
+		if ( current_user_can( 'manage_woocommerce' ) ) {
+			// translators: 1-2: opening/closing tags - link to documentation.
+			$no_gateways_message = sprintf( __( 'Sorry, it seems there are no available payment methods which support subscriptions. Please see %1$sEnabling Payment Gateways for Subscriptions%2$s if you require assistance.', 'flexible-subscriptions' ), '<a href="https://docs.woocommerce.com/document/subscriptions/enabling-payment-gateways-for-subscriptions/">', '</a>' );
+		} else {
+			$no_gateways_message = __( 'Sorry, it seems there are no available payment methods which support subscriptions. Please contact us if you require assistance or wish to make alternate arrangements.', 'flexible-subscriptions' );
 		}
 
 		return $no_gateways_message;

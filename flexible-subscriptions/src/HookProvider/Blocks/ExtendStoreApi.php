@@ -9,6 +9,7 @@ use WPDesk\FlexibleSubscriptions\Cart\SubscriptionCandidate;
 use WPDesk\FlexibleSubscriptions\Cart\SubscriptionCandidatesList;
 use WPDesk\FlexibleSubscriptions\Product\SubscriptionProduct;
 use WPDesk\FlexibleSubscriptions\Product\SubscriptionProductWrapper;
+use WPDesk\FlexibleSubscriptions\Settings\PaymentOptions;
 use WPDesk\FlexibleSubscriptions\Subscription\Proposal\RecurringShippingResolver;
 use WPDesk\FlexibleSubscriptions\Utils\HookProvider;
 
@@ -18,9 +19,12 @@ class ExtendStoreApi implements HookProvider {
 
 	private RecurringShippingResolver $shipping_resolver;
 
-	public function __construct( SubscriptionCandidatesList $candidates, RecurringShippingResolver $shipping_resolver ) {
+	private PaymentOptions $payment_options;
+
+	public function __construct( SubscriptionCandidatesList $candidates, RecurringShippingResolver $shipping_resolver, PaymentOptions $payment_options ) {
 		$this->candidates        = $candidates;
 		$this->shipping_resolver = $shipping_resolver;
+		$this->payment_options   = $payment_options;
 	}
 
 	public function hooks(): void {
@@ -218,7 +222,17 @@ class ExtendStoreApi implements HookProvider {
 	 * @return string[]
 	 */
 	public function get_payment_requirements(): array {
-		return count( $this->candidates ) > 0 ? [ 'subscriptions' ] : [];
+		if (
+			count( $this->candidates ) === 0 ||
+			apply_filters(
+				'fsub/payment/manual_renewal/enabled',
+				$this->payment_options->manual_renewal_enabled()
+			)
+		) {
+			return [];
+		}
+
+		return count( $this->candidates ) > 1 ? [ 'multiple_subscriptions' ] : [ 'subscriptions' ];
 	}
 
 	/**

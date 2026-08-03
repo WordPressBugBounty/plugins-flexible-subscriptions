@@ -18,6 +18,7 @@ final class LifecycleSkipReason {
 	public const RENEWAL_LOCK_NOT_ACQUIRED          = 'renewal_lock_not_acquired';
 
 	// SubscriptionLifecycleManager::process_paid_renewal skip reasons.
+	public const SUBSCRIPTION_FINALIZED             = 'subscription_finalized';
 	public const RENEWAL_NOT_LATEST_PAYMENT_REQUEST = 'renewal_not_latest_payment_request';
 	public const RENEWAL_PERIOD_ALREADY_ADVANCED    = 'renewal_period_already_advanced';
 	public const RENEWAL_PERIOD_ADVANCE_FAILED      = 'renewal_period_advance_failed';

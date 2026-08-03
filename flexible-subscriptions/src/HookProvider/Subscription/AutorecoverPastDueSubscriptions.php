@@ -87,12 +87,18 @@ final class AutorecoverPastDueSubscriptions implements HookProvider {
 				continue;
 			}
 
-			if ( $subscription->is_manual() || $subscription->is_expired( $now ) ) {
+			$current_period_end = $subscription->get_current_period_end();
+			if ( ! $current_period_end instanceof \DateTimeInterface ) {
 				continue;
 			}
 
-			$current_period_end = $subscription->get_current_period_end();
-			if ( ! $current_period_end instanceof \DateTimeInterface ) {
+			if ( ! $subscription->is_active() ) {
+				$skip_reason = $subscription->is_finalized() ? 'subscription_finalized_skip_recovery' : 'subscription_not_active';
+				$this->log_anomaly( $subscription, $current_period_end, $subscription->get_recent_payment_request_id(), $skip_reason );
+				continue;
+			}
+
+			if ( $subscription->is_manual() || $subscription->is_expired( $now ) ) {
 				continue;
 			}
 
