@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'wpdesk/flexible-subscriptions',
-        'pretty_version' => '1.8.0',
-        'version' => '1.8.0.0',
-        'reference' => 'a390879586a2a26be5e76bfbe89480a3158080e6',
+        'pretty_version' => '1.8.1',
+        'version' => '1.8.1.0',
+        'reference' => '11efd7a7760669f338add16398b41f42d17e97a3',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -20,9 +20,9 @@
             'dev_requirement' => false,
         ),
         'wpdesk/flexible-subscriptions' => array(
-            'pretty_version' => '1.8.0',
-            'version' => '1.8.0.0',
-            'reference' => 'a390879586a2a26be5e76bfbe89480a3158080e6',
+            'pretty_version' => '1.8.1',
+            'version' => '1.8.1.0',
+            'reference' => '11efd7a7760669f338add16398b41f42d17e97a3',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
