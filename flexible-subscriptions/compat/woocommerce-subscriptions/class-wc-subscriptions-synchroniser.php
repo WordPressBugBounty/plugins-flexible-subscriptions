@@ -21,4 +21,12 @@ class WC_Subscriptions_Synchroniser {
 		return 0;
 	}
 
+	public static function maybe_set_free_trial( $total = '' ) {
+		return $total;
+	}
+
+	public static function maybe_unset_free_trial( $total = '' ) {
+		return $total;
+	}
+
 }

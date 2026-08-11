@@ -118,7 +118,7 @@ class OrderDataTransfer
             $data = $options['data_filter']($data, $to, $from);
         }
         foreach ($data as $key => $value) {
-            $this->set_data($to, $key, maybe_unserialize($value));
+            $this->set_data($to, $key, $value);
         }
     }
     private function create_order(): \WC_Order
