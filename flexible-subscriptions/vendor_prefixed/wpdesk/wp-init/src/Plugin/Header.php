@@ -3,9 +3,12 @@
 declare (strict_types=1);
 namespace WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Plugin;
 
+/** @implements \ArrayAccess<array-key, mixed> */
 final class Header implements \ArrayAccess
 {
+    /** @var array<string, mixed> */
     private array $header_data;
+    /** @param array<string, mixed> $header_data */
     public function __construct(array $header_data)
     {
         $this->header_data = $header_data;
@@ -33,6 +36,7 @@ final class Header implements \ArrayAccess
     {
         throw new \BadMethodCallException('Header cannot be modified');
     }
+    /** @return mixed */
     public function get(string $key)
     {
         return $this->header_data[$key];

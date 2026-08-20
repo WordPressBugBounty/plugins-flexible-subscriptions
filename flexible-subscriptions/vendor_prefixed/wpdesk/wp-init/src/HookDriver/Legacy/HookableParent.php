@@ -5,6 +5,9 @@ namespace WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\HookDriver\Legacy;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\PluginBuilder\Plugin\Conditional;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\PluginBuilder\Plugin\Hookable;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\PluginBuilder\Plugin\HookablePluginDependant;
+/**
+ * @internal Legacy migration support detail.
+ */
 trait HookableParent
 {
     /** @var HooksRegistry|null */

@@ -5,13 +5,8 @@
  */
 namespace WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init;
 
-use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Extension\LegacyExtension;
-use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Extension\BuiltinExtension;
-use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Extension\ConfigExtension;
-use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Extension\ExtensionsSet;
-use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Util\PhpFileLoader;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Configuration\Configuration;
-use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Extension\ConditionalExtension;
+use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Util\PhpFileLoader;
 final class Init
 {
     /** @var bool */
@@ -62,11 +57,7 @@ final class Init
             // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
             $filename = $backtrace[0]['file'];
         }
-        $extensions = new ExtensionsSet(new BuiltinExtension(), new ConfigExtension(), new ConditionalExtension());
-        if ($this->config->get('legacy', \false) && class_exists(\WPDesk\FlexibleSubscriptions\Vendor\WPDesk_Plugin_Info::class)) {
-            $extensions->add(new LegacyExtension());
-        }
-        $kernel = new Kernel($filename, $this->config, $extensions);
+        $kernel = new Kernel($filename, $this->config);
         $kernel->boot();
     }
 }

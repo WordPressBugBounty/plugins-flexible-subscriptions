@@ -5,6 +5,9 @@ namespace WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\HookDriver;
 
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Binding\Binder;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Binding\Loader\BindingDefinitions;
+/**
+ * @internal Hook driver implementation detail.
+ */
 class GenericDriver implements HookDriver
 {
     private BindingDefinitions $definitions;

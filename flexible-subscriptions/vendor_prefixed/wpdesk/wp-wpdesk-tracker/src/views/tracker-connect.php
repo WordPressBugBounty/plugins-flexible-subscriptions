@@ -2,6 +2,10 @@
 
 namespace WPDesk\FlexibleSubscriptions\Vendor;
 
+/** @var string $username */
+/** @var string $allow_url */
+/** @var string $skip_url */
+/** @var string $terms_url */
 if (!\defined('ABSPATH')) {
     exit;
 }

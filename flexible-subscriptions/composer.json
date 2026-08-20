@@ -51,13 +51,13 @@
 		"wpdesk/wp-codeception": "^3",
 		"wpdesk/wp-format": "^1.0",
 		"wpdesk/wp-forms": "^3",
-		"wpdesk/wp-init": "0.10.*",
+		"wpdesk/wp-init": "^1",
+		"wpdesk/wp-init-plugin-free": "^1",
 		"wpdesk/wp-interval": "^1.0",
 		"wpdesk/wp-logs": "^1",
 		"wpdesk/wp-notice": "^3",
 		"wpdesk/wp-wpdesk-composer": "^3",
-		"wpdesk/wp-wpdesk-marketing": "^1.1",
-		"wpdesk/wp-wpdesk-tracker": "^3.9.3"
+		"wpdesk/wp-wpdesk-marketing": "^1.1"
 	},
 	"extra": {
 		"text-domain": "flexible-subscriptions",
@@ -85,6 +85,6 @@
 			"url": "https://gitlab.wpdesk.dev/api/v4/group/wpdesk/-/packages/composer/"
 		}
 	},
-	"version": "1.8.2",
+	"version": "1.8.3",
 	"type": "wordpress-plugin"
 }

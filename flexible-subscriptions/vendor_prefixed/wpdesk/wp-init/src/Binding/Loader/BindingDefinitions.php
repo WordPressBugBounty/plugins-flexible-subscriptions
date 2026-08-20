@@ -7,7 +7,7 @@ use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Binding\Definition;
 interface BindingDefinitions
 {
     /**
-     * @return iterable<Definition>
+     * @return iterable<Definition<mixed>>
      */
     public function load(): iterable;
 }

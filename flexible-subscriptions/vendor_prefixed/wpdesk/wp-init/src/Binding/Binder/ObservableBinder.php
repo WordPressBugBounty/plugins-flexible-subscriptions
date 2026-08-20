@@ -17,11 +17,13 @@ final class ObservableBinder implements ComposableBinder
     {
         $this->binder = $b;
     }
+    /** @param Definition<mixed> $def */
     public function bind(Definition $def): void
     {
         $this->binder->bind($def);
         ++$this->binds_count;
     }
+    /** @param Definition<mixed> $def */
     public function can_bind(Definition $def): bool
     {
         if ($this->binder instanceof ComposableBinder) {

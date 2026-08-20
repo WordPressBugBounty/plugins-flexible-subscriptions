@@ -2,6 +2,8 @@
 
 namespace WPDesk\FlexibleSubscriptions\Vendor;
 
+/** @var string $username */
+/** @var string $terms_url */
 if (!\defined('ABSPATH')) {
     exit;
 }

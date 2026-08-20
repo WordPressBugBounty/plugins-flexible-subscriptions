@@ -3,15 +3,15 @@
  * Plugin Name: Flexible Subscriptions
  * Plugin URI: https://www.wpdesk.net/sk/flexible-subscriptions-plugin/
  * Description: Flexible Subscriptions is a WooCommerce extension that allows you to create flexible subscription products.
- * Version: 1.8.2
+ * Version: 1.8.3
  * Author: WP Desk
  * Author URI: https://www.wpdesk.net/sk/flexible-subscriptions-author/
  * Text Domain: flexible-subscriptions
  * Domain Path: /lang/
  * Requires at least: 6.4
- * Tested up to: 7.0
+ * Tested up to: 7.1
  * WC requires at least: 10.7
- * WC tested up to: 11.0
+ * WC tested up to: 11.1
  * License: GPL v2 or later
  * Requires PHP: 7.4
  * Requires Plugins: woocommerce
@@ -33,25 +33,42 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use WPDesk\FlexibleSubscriptions\HookProvider\WooCommerceSubscriptionsDetector;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Init;
+use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\PluginFree\FreePluginModule;
+use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\PluginFree\WPDeskTrackerModule;
+use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\PluginFree\RequirementsModule;
 
 require __DIR__ . '/vendor/autoload.php';
 
 Init::setup(
 	[
-		'hook_resources_path' => 'config/hook_providers',
-		'services'            => 'config/services.inc.php',
-
-		'requirements'        => [
-			'php'          => '7.4',
-			'wp'           => '6.3',
-			'repo_plugins' => [
-				[
-					'name'      => 'woocommerce/woocommerce.php',
-					'nice_name' => 'WooCommerce',
-					'version'   => '8.9',
+		'hooks'    => 'config/hook_providers',
+		'services' => 'config/services.inc.php',
+		'modules'  => [
+			FreePluginModule::class => null,
+			WPDeskTrackerModule::class => [
+				'shops' => [
+					'default' => 'https://wpdesk.net/',
+					'pl_PL' => 'https://www.wpdesk.pl/',
 				],
 			],
+			RequirementsModule::class => [
+				'requirements'        => [
+					'php'          => '7.4',
+					'wp'           => '6.3',
+					'repo_plugins' => [
+						[
+							'name'      => 'woocommerce/woocommerce.php',
+							'nice_name' => 'WooCommerce',
+							'version'   => '8.9',
+						],
+					],
+				],
+			],
+		],
+		'gates'	=> [
+			WooCommerceSubscriptionsDetector::class,
 		],
 	]
 )->boot();

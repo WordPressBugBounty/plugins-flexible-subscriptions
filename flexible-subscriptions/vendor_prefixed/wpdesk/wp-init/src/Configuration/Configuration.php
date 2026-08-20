@@ -3,13 +3,11 @@
 declare (strict_types=1);
 namespace WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Configuration;
 
-/**
- * @implements \ArrayAccess<string, mixed>
- */
-class Configuration implements ReadableConfig, \ArrayAccess
+class Configuration implements ReadableConfig
 {
     /** @var array<string, mixed> */
     private array $config;
+    /** @param array<string, mixed> $config */
     public function __construct(array $config)
     {
         $this->config = $config;
@@ -28,6 +26,7 @@ class Configuration implements ReadableConfig, \ArrayAccess
     {
         return isset($this->config[$key]);
     }
+    /** @param mixed $value */
     public function set(string $key, $value): void
     {
         $this->config[$key] = $value;
@@ -35,25 +34,5 @@ class Configuration implements ReadableConfig, \ArrayAccess
     public function remove(string $key): void
     {
         unset($this->config[$key]);
-    }
-    public function offsetExists($offset): bool
-    {
-        return $this->has($offset);
-    }
-    #[\ReturnTypeWillChange]
-    public function offsetGet($offset)
-    {
-        return $this->get($offset);
-    }
-    public function offsetSet($offset, $value): void
-    {
-        if ($offset === null) {
-            throw new \InvalidArgumentException('Cannot set value without key.');
-        }
-        $this->set($offset, $value);
-    }
-    public function offsetUnset($offset): void
-    {
-        $this->remove($offset);
     }
 }

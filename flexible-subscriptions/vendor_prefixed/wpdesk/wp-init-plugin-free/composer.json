@@ -1,0 +1,30 @@
+{
+    "name": "wpdesk\/wp-init-plugin-free",
+    "description": "Preset for free WP Desk plugins using wp-init.",
+    "license": "MIT",
+    "type": "library",
+    "require": {
+        "php": ">=7.4 | ^8",
+        "psr\/log": "^1 || ^2 || ^3",
+        "wpdesk\/wp-init": "^1.0",
+        "wpdesk\/wp-basic-requirements": "^3",
+        "wpdesk\/wp-logs": "^1",
+        "wpdesk\/wp-wpdesk-tracker": "^3.12"
+    },
+    "config": {
+        "gitlab-domains": [
+            "gitlab.wpdesk.dev"
+        ]
+    },
+    "autoload": {
+        "psr-4": {
+            "WPDesk\\FlexibleSubscriptions\\Vendor\\WPDesk\\Init\\PluginFree\\": "src\/"
+        }
+    },
+    "repositories": {
+        "wpdesk": {
+            "type": "composer",
+            "url": "https:\/\/gitlab.wpdesk.dev\/api\/v4\/group\/wpdesk\/-\/packages\/composer\/"
+        }
+    }
+}

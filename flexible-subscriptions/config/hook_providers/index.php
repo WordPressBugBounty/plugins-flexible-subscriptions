@@ -6,16 +6,11 @@ use WPDesk\FlexibleSubscriptions\HookProvider\Blocks\ExtendStoreApi;
 use WPDesk\FlexibleSubscriptions\HookProvider\Gateways;
 use WPDesk\FlexibleSubscriptions\HookProvider\Subscription;
 use WPDesk\FlexibleSubscriptions\HookProvider\Init;
-use WPDesk\FlexibleSubscriptions\HookProvider\WooCommerceSubscriptionsDetector;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Notice\AjaxHandler;
 
 defined( 'ABSPATH' ) || exit;
 
 return [
-	[
-		'handler'  => WooCommerceSubscriptionsDetector::class,
-		'priority' => -9,
-	],
 	[
 		'handler'  => Gateways\GatewayCompatibilityLoader::class,
 		'priority' => -10,

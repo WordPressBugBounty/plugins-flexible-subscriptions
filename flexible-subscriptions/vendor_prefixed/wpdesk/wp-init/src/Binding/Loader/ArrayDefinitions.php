@@ -5,12 +5,15 @@ namespace WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Binding\Loader;
 
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Binding\Definition;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Binding\DefinitionFactory;
-use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Configuration\ReadableConfig;
-use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\Plugin\Plugin;
+/**
+ * @internal Binding loader implementation detail.
+ */
 class ArrayDefinitions implements BindingDefinitions
 {
+    /** @var array<int|string, mixed> */
     private array $bindings;
     private DefinitionFactory $factory;
+    /** @param array<int|string, mixed> $bindings */
     public function __construct(array $bindings, ?DefinitionFactory $factory = null)
     {
         $this->bindings = $bindings;
@@ -21,14 +24,16 @@ class ArrayDefinitions implements BindingDefinitions
         yield from $this->normalize($this->bindings);
     }
     /**
-     * @param iterable<string,array> $bindings
+     * @param iterable<int|string,mixed> $bindings
      *
-     * @return iterable<Definition>
+     * @return iterable<Definition<mixed>>
      */
     private function normalize(iterable $bindings): iterable
     {
         foreach ($bindings as $key => $value) {
-            if (is_array($value)) {
+            if (is_callable($value)) {
+                yield $this->create($value, $key);
+            } elseif (is_array($value)) {
                 if (isset($value['handler'])) {
                     // Single item with handler.
                     yield $this->create($value['handler'], $key, $value);
@@ -50,6 +55,9 @@ class ArrayDefinitions implements BindingDefinitions
     /**
      * @param mixed $value
      * @param int|string $hook
+     * @param array<string, mixed> $options
+     *
+     * @return Definition<mixed>
      */
     private function create($value, $hook, array $options = []): Definition
     {

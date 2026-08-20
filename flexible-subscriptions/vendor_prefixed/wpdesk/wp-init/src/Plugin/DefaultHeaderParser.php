@@ -59,7 +59,7 @@ class DefaultHeaderParser implements HeaderParser
      */
     public function parse(string $plugin_file): array
     {
-        $plugin_data = $this->get_file_data($plugin_file, self::HEADERS);
+        $plugin_data = $this->get_file_data($plugin_file);
         if (isset($plugin_data['Network'])) {
             $plugin_data['Network'] = filter_var($plugin_data['Network'], \FILTER_VALIDATE_BOOLEAN);
         }
@@ -84,12 +84,11 @@ class DefaultHeaderParser implements HeaderParser
      * @since 2.9.0
      *
      * @param string $file Absolute path to the file.
-     * @param array $default_headers List of headers, in the format `array( 'HeaderKey' => 'Header
      *                                Name' )`.
      *
      * @return string[] Array of file header values keyed by header name.
      */
-    private function get_file_data(string $file, array $default_headers): array
+    private function get_file_data(string $file): array
     {
         // Pull only the first 8 KB of the file in.
         $file_data = file_get_contents($file, \false, null, 0, 8 * self::KB_IN_BYTES);
@@ -99,7 +98,7 @@ class DefaultHeaderParser implements HeaderParser
         // Make sure we catch CR-only line endings.
         $file_data = \str_replace("\r", "\n", $file_data);
         $headers = [];
-        foreach ($default_headers as $field => $regex) {
+        foreach (self::HEADERS as $field => $regex) {
             if (preg_match('/^(?:[ \t]*<\?php)?[ \t\/*#@]*' . preg_quote($regex, '/') . ':(.*)$/mi', $file_data, $match) && $match[1]) {
                 $headers[$field] = $this->_cleanup_header_comment($match[1]);
             }

@@ -3,6 +3,9 @@
 declare (strict_types=1);
 namespace WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Init\HookDriver;
 
+/**
+ * @internal Hook driver implementation detail.
+ */
 final class CompositeDriver implements HookDriver
 {
     /** @var HookDriver[] */

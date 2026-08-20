@@ -27,7 +27,9 @@ if (!\class_exists('WPDesk\FlexibleSubscriptions\Vendor\WPDesk_Tracker_Data_Prov
          */
         public function get_data()
         {
-            return ['admin_user_agents' => \array_filter((array) \get_option('woocommerce_tracker_ua', []))];
+            return ['admin_user_agents' => \array_filter((array) \get_option('woocommerce_tracker_ua', []), static function ($value): bool {
+                return !empty($value);
+            })];
         }
     }
 }

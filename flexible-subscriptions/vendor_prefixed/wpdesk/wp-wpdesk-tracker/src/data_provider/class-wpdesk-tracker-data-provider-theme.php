@@ -29,7 +29,7 @@ if (!\class_exists('WPDesk\FlexibleSubscriptions\Vendor\WPDesk_Tracker_Data_Prov
         {
             $theme_data = \wp_get_theme();
             $theme_child_theme = \is_child_theme() ? 'Yes' : 'No';
-            return ['theme' => ['name' => $theme_data->Name, 'version' => $theme_data->Version, 'child_theme' => $theme_child_theme]];
+            return ['theme' => ['name' => $theme_data->get('Name'), 'version' => $theme_data->get('Version'), 'child_theme' => $theme_child_theme]];
         }
     }
 }

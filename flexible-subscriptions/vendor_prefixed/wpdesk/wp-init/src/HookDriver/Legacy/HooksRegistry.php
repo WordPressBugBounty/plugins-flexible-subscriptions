@@ -6,7 +6,9 @@ use WPDesk\FlexibleSubscriptions\Vendor\Psr\Container\ContainerInterface;
 use Traversable;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\PluginBuilder\Plugin\Hookable;
 /**
- * @implements IteratorAggregate<int,Hookable>
+ * @internal Legacy migration support detail.
+ *
+ * @implements \IteratorAggregate<int,Hookable>
  */
 final class HooksRegistry implements \IteratorAggregate
 {
@@ -21,7 +23,7 @@ final class HooksRegistry implements \IteratorAggregate
     {
         $this->container = $c;
     }
-    public static function instance(): HooksRegistry
+    public static function instance(): self
     {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -32,6 +34,7 @@ final class HooksRegistry implements \IteratorAggregate
     {
         return new \ArrayIterator(array_map(fn($hookable) => is_string($hookable) ? $this->container->get($hookable) : $hookable, $this->callbacks));
     }
+    /** @param class-string<Hookable>|Hookable $hookable */
     public function add($hookable): void
     {
         $this->callbacks[] = $hookable;
