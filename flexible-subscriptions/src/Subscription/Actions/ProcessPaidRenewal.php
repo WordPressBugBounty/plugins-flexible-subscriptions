@@ -36,6 +36,8 @@ final class ProcessPaidRenewal {
 	}
 
 	public function execute( Renewal $renewal, ?string $old_status = null ): void {
+		$original_renewal = $renewal;
+
 		if ( $renewal->needs_payment() || $renewal->is_paid() === false ) {
 			return;
 		}
@@ -103,6 +105,12 @@ final class ProcessPaidRenewal {
 		}
 
 		try {
+			$renewal_and_subscription = $this->refresh_renewal_and_subscription( $renewal );
+			if ( $renewal_and_subscription === null ) {
+				return;
+			}
+			[ $renewal, $subscription ] = $renewal_and_subscription;
+
 			$next_period = $this->billing_calculator->calculate_next_period( $subscription->get_current_period_end(), $subscription->get_billing_frequency() );
 			$advanced    = $subscription->advance_billing_period( $next_period );
 			if ( ! $advanced ) {
@@ -120,6 +128,7 @@ final class ProcessPaidRenewal {
 
 			$renewal->mark_period_advanced();
 			$renewal->save();
+			$original_renewal->mark_period_advanced();
 
 			$this->repository->save( $subscription );
 			$current_period_end = $subscription->get_current_period_end();
@@ -147,5 +156,25 @@ final class ProcessPaidRenewal {
 		} finally {
 			$this->renewal_lock->release( $subscription->get_id(), $lock_owner );
 		}
+	}
+
+	/** @return array{Renewal, Subscription}|null */
+	private function refresh_renewal_and_subscription( Renewal $renewal ): ?array {
+		$fresh_order = wc_get_order( $renewal->get_id() );
+		if ( ! $fresh_order instanceof \WC_Order ) {
+			return null;
+		}
+
+		$renewal = Renewal::from_order( $fresh_order );
+		if ( ! $renewal instanceof Renewal || $renewal->is_period_advanced() ) {
+			return null;
+		}
+
+		$subscription = $this->repository->find( $renewal->get_subscription_id() );
+		if ( ! $subscription instanceof Subscription || $subscription->get_recent_payment_request_id() !== $renewal->get_id() ) {
+			return null;
+		}
+
+		return [ $renewal, $subscription ];
 	}
 }

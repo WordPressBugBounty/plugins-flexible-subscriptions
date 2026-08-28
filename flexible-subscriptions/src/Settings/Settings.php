@@ -23,6 +23,6 @@ class Settings implements ContainerInterface {
 	}
 
 	public function get_bool( string $key, $default = false ) {
-		return filter_var( $this->get( $key, $default ), \FILTER_VALIDATE_BOOL );
+		return filter_var( $this->get( $key, $default ), \FILTER_VALIDATE_BOOLEAN );
 	}
 }

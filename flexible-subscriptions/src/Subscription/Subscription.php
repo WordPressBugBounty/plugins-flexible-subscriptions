@@ -781,7 +781,7 @@ class Subscription extends \WC_Order {
 	}
 
 	public function get_requires_manual_renewal(): bool {
-		return filter_var( $this->get_prop( 'requires_manual_renewal' ), \FILTER_VALIDATE_BOOL );
+		return filter_var( $this->get_prop( 'requires_manual_renewal' ), \FILTER_VALIDATE_BOOLEAN );
 	}
 
 	public function get_start_date(): ?\DateTimeInterface {
@@ -920,7 +920,7 @@ class Subscription extends \WC_Order {
 
 	/** @internal */
 	public function set_requires_manual_renewal( $requires_manaul_renewal ): void {
-		$this->set_prop( 'requires_manual_renewal', filter_var( $requires_manaul_renewal, \FILTER_VALIDATE_BOOL ) );
+		$this->set_prop( 'requires_manual_renewal', filter_var( $requires_manaul_renewal, \FILTER_VALIDATE_BOOLEAN ) );
 	}
 
 	/** @internal */
