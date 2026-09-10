@@ -47,7 +47,7 @@ final class ProcessPaidRenewal {
 			return;
 		}
 
-		if ( $subscription->is_finalized() ) {
+		if ( $subscription->is_finalized() && ! $subscription->is_pending_cancel() ) {
 			$this->logger->warning(
 				'billing.renewal.process_paid.skipped',
 				[
@@ -58,10 +58,6 @@ final class ProcessPaidRenewal {
 				]
 			);
 			return;
-		}
-
-		if ( $old_status === 'failed' ) {
-			do_action( 'fsub/subscription/payment_request/updated_failing_payment_method', $subscription, $renewal );
 		}
 
 		if ( $subscription->get_recent_payment_request_id() !== $renewal->get_id() ) {
@@ -110,6 +106,15 @@ final class ProcessPaidRenewal {
 				return;
 			}
 			[ $renewal, $subscription ] = $renewal_and_subscription;
+
+			$payment_method_changed = $subscription->get_payment_method() !== $renewal->get_payment_method();
+			if ( ! $subscription->is_manual() && ( $old_status === 'failed' || $payment_method_changed ) ) {
+				$renewal_order = $renewal->get_order();
+				$subscription->set_payment_method( $renewal->get_payment_method() );
+				$subscription->set_payment_method_title( $renewal_order->get_payment_method_title() );
+				$this->repository->save( $subscription );
+				do_action( 'fsub/subscription/payment_request/updated_failing_payment_method', $subscription, $renewal );
+			}
 
 			$next_period = $this->billing_calculator->calculate_next_period( $subscription->get_current_period_end(), $subscription->get_billing_frequency() );
 			$advanced    = $subscription->advance_billing_period( $next_period );
@@ -171,7 +176,7 @@ final class ProcessPaidRenewal {
 		}
 
 		$subscription = $this->repository->find( $renewal->get_subscription_id() );
-		if ( ! $subscription instanceof Subscription || $subscription->get_recent_payment_request_id() !== $renewal->get_id() ) {
+		if ( ! $subscription instanceof Subscription || ( $subscription->is_finalized() && ! $subscription->is_pending_cancel() ) || $subscription->get_recent_payment_request_id() !== $renewal->get_id() ) {
 			return null;
 		}
 

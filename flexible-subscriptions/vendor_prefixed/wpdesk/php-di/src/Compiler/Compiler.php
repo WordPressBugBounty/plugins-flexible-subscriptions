@@ -7,7 +7,6 @@ use function chmod;
 use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\ArrayDefinition;
 use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\DecoratorDefinition;
 use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\Definition;
-use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\EnvironmentVariableDefinition;
 use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\Exception\InvalidDefinition;
 use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\FactoryDefinition;
 use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\ObjectDefinition;
@@ -201,19 +200,6 @@ class Compiler
                 $entryName = $this->compileValue($definition->getName());
                 $expression = $this->compileValue($definition->getExpression());
                 $code = 'return \DI\Definition\StringDefinition::resolveExpression(' . $entryName . ', ' . $expression . ', $this->delegateContainer);';
-                break;
-            case $definition instanceof EnvironmentVariableDefinition:
-                $variableName = $this->compileValue($definition->getVariableName());
-                $isOptional = $this->compileValue($definition->isOptional());
-                $defaultValue = $this->compileValue($definition->getDefaultValue());
-                $code = <<<PHP
-        \$value = \$_ENV[{$variableName}] ?? \$_SERVER[{$variableName}] ?? getenv({$variableName});
-        if (false !== \$value) return \$value;
-        if (!{$isOptional}) {
-            throw new \\DI\\Definition\\Exception\\InvalidDefinition("The environment variable '{$definition->getVariableName()}' has not been defined");
-        }
-        return {$defaultValue};
-PHP;
                 break;
             case $definition instanceof ArrayDefinition:
                 try {

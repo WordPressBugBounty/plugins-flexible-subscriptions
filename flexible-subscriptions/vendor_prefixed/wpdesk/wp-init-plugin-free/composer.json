@@ -6,9 +6,9 @@
     "require": {
         "php": ">=7.4 | ^8",
         "psr\/log": "^1 || ^2 || ^3",
-        "wpdesk\/wp-init": "^1.0",
+        "wpdesk\/wp-init": "^1",
         "wpdesk\/wp-basic-requirements": "^3",
-        "wpdesk\/wp-logs": "^1",
+        "wpdesk\/wp-logs": "^1 || ^2",
         "wpdesk\/wp-wpdesk-tracker": "^3.12"
     },
     "config": {

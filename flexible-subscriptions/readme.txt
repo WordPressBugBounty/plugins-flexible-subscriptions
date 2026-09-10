@@ -1,12 +1,12 @@
 === Flexible Subscriptions ===
-Contributors: wpdesk,bartj
+Contributors: wpdesk,bartj, mdworowy
 Tags: subscriptions, woocommerce, recurring payments, subscription management, recurring revenue
 Author URL: https://wpdesk.net/sk/flexible-subscriptions-rm-author
 Donate link: https://wpdesk.net/sk/flexible-subscriptions-rm-donate
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.8.4
+Stable tag: 1.8.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -160,6 +160,12 @@ Please report security bugs found in the source code of the Flexible Subscriptio
 19. Support tab with quick instructions about the plugin.
 
 == Changelog ==
+
+= 1.8.5 - 2026-09-10 =
+* Added bulk subscription status changes to the admin subscription list.
+* Fixed subscription reactivation after paying a renewal for a subscription pending cancellation.
+* Fixed payment method synchronization after paying a failed automatic renewal with a new method.
+* Fixed WooCommerce Subscriptions compatibility when handling failed payments.
 
 = 1.8.4 - 2026-08-28 =
 * Fixed a renewal payment being able to advance its billing period more than once.

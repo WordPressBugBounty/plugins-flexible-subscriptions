@@ -4,7 +4,6 @@ declare (strict_types=1);
 namespace WPDesk\FlexibleSubscriptions\Vendor\DI;
 
 use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\ArrayDefinitionExtension;
-use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\EnvironmentVariableDefinition;
 use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\Helper\AutowireDefinitionHelper;
 use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\Helper\CreateDefinitionHelper;
 use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\Helper\FactoryDefinitionHelper;
@@ -83,20 +82,6 @@ if (!function_exists('WPDesk\FlexibleSubscriptions\Vendor\DI\get')) {
     function get(string $entryName): Reference
     {
         return new Reference($entryName);
-    }
-}
-if (!function_exists('WPDesk\FlexibleSubscriptions\Vendor\DI\env')) {
-    /**
-     * Helper for referencing environment variables.
-     *
-     * @param string $variableName The name of the environment variable.
-     * @param mixed $defaultValue The default value to be used if the environment variable is not defined.
-     */
-    function env(string $variableName, $defaultValue = null): EnvironmentVariableDefinition
-    {
-        // Only mark as optional if the default value was *explicitly* provided.
-        $isOptional = 2 === func_num_args();
-        return new EnvironmentVariableDefinition($variableName, $isOptional, $defaultValue);
     }
 }
 if (!function_exists('WPDesk\FlexibleSubscriptions\Vendor\DI\add')) {

@@ -91,10 +91,10 @@ class WC_Subscription extends Subscription {
 		$max_failed_exceeded = apply_filters( 'woocommerce_subscription_max_failed_payments_exceeded', false, $this );
 
 		if ( 'cancelled' === $new_status || $max_failed_exceeded ) {
-			if ( $this->can_update_status( 'cancelled' ) ) {
+			if ( $this->can_be_updated_to( 'cancelled' ) ) {
 				$this->update_status( 'cancelled', __( 'Subscription Cancelled: maximum number of failed payments reached.', 'flexible-subscriptions' ) );
 			}
-		} elseif ( $this->can_update_status( $new_status ) ) {
+		} elseif ( $this->can_be_updated_to( $new_status ) ) {
 			$this->update_status( $new_status );
 		}
 	}

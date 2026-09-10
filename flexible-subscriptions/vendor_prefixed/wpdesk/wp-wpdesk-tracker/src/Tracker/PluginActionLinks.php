@@ -2,7 +2,6 @@
 
 namespace WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Tracker;
 
-use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\PluginBuilder\Plugin\Hookable;
 /**
  * Can add Plugin actions links: opt-in/opt-out to tracker.
  */

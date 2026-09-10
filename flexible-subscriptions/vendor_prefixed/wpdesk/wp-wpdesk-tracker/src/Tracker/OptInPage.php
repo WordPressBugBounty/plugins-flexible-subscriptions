@@ -2,7 +2,6 @@
 
 namespace WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Tracker;
 
-use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\PluginBuilder\Plugin\Hookable;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\View\Renderer\SimplePhpRenderer;
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\View\Resolver\DirResolver;
 class OptInPage implements Hookable

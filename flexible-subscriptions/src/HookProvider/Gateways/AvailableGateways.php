@@ -6,6 +6,8 @@ namespace WPDesk\FlexibleSubscriptions\HookProvider\Gateways;
 
 use WPDesk\FlexibleSubscriptions\Cart\SubscriptionCandidatesList;
 use WPDesk\FlexibleSubscriptions\Settings\PaymentOptions;
+use WPDesk\FlexibleSubscriptions\Subscription\Renewal\Renewal;
+use WPDesk\FlexibleSubscriptions\Subscription\Subscription;
 use WPDesk\FlexibleSubscriptions\Utils\HookProvider;
 
 class AvailableGateways implements HookProvider {
@@ -35,6 +37,13 @@ class AvailableGateways implements HookProvider {
 			unset( $gateways[ WooPaymentsIncompatibility::WOOCOMMERCE_PAYMENTS_ID ] );
 		}
 
+		if ( $this->is_failed_automatic_renewal_payment() ) {
+			return array_filter(
+				$gateways,
+				fn ( $gateway ) => $gateway->supports( 'subscription_payment_method_change_customer' )
+			);
+		}
+
 		if (
 			apply_filters(
 				'fsub/payment/manual_renewal/enabled',
@@ -57,6 +66,21 @@ class AvailableGateways implements HookProvider {
 		}
 
 		return $gateways;
+	}
+
+	private function is_failed_automatic_renewal_payment(): bool {
+		$order = wc_get_order( absint( get_query_var( 'order-pay' ) ) );
+		if ( ! $order instanceof \WC_Order || ! $order->has_status( 'failed' ) ) {
+			return false;
+		}
+
+		$renewal = Renewal::from_order( $order );
+		if ( ! $renewal instanceof Renewal ) {
+			return false;
+		}
+
+		$subscription = wc_get_order( $renewal->get_subscription_id() );
+		return $subscription instanceof Subscription && ! $subscription->is_manual();
 	}
 
 	/**

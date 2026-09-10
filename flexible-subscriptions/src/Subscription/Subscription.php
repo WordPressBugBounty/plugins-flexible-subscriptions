@@ -312,12 +312,7 @@ class Subscription extends \WC_Order {
 			return;
 		}
 
-		$end_date = $start_date->add( $expiration );
-		if ( $trial_end_date instanceof \DateTimeInterface ) {
-			$end_date = $end_date->add( $trial_end_date->diff( $start_date, true ) );
-		}
-
-		$this->set_end_date( $end_date );
+		$this->set_end_date( $this->calculate_end_date( $start_date, $trial_end_date, $expiration ) );
 	}
 
 	#[\Deprecated( 'Use initialize_first_period() for first cycle setup and advance_billing_period() for renewals.' )]
@@ -361,13 +356,18 @@ class Subscription extends \WC_Order {
 	/**
 	 * Advance the current billing period by one billing interval.
 	 *
-	 * This method intentionally does not modify {@see self::get_end_date()} or trial dates.
+	 * This method does not modify {@see self::get_end_date()} or trial dates unless it
+	 * reactivates a subscription pending cancellation.
 	 * It is meant to be used after a successful renewal payment, even if the subscription
 	 * status did not transition through an "unpaid" state.
 	 */
 	public function advance_billing_period( \DatePeriod $period ): bool {
 		if ( $this->get_current_period_end() == $period->getEndDate() ) {
 			return false;
+		}
+
+		if ( $this->is_pending_cancel() ) {
+			$this->restore_end_date_after_cancellation();
 		}
 
 		$this->set_current_period_start( $period->getStartDate() );
@@ -381,6 +381,28 @@ class Subscription extends \WC_Order {
 		$this->record_event( new SubscriptionActivated( $this ) );
 
 		return true;
+	}
+
+	private function restore_end_date_after_cancellation(): void {
+		$start      = $this->to_immutable_date( $this->get_start_date() );
+		$expiration = $this->get_expiration_interval();
+
+		if ( ! $start instanceof \DateTimeImmutable || ! $expiration instanceof WPInterval ) {
+			$this->set_end_date( null );
+			return;
+		}
+
+		$trial_end = $this->to_immutable_date( $this->get_trial_end_date() );
+		$this->set_end_date( $this->calculate_end_date( $start, $trial_end, $expiration ) );
+	}
+
+	private function calculate_end_date(
+		\DateTimeImmutable $start,
+		?\DateTimeImmutable $trial_end,
+		WPInterval $expiration
+	): \DateTimeImmutable {
+		$end_date = $start->add( $expiration );
+		return $trial_end instanceof \DateTimeImmutable ? $end_date->add( $trial_end->diff( $start, true ) ) : $end_date;
 	}
 
 	/**

@@ -2,8 +2,6 @@
 
 namespace WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Tracker;
 
-use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\PluginBuilder\Plugin\HookableCollection;
-use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\PluginBuilder\Plugin\HookableParent;
 class OptInOptOut implements HookableCollection
 {
     use HookableParent;

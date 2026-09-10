@@ -2,7 +2,6 @@
 
 namespace WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Tracker;
 
-use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\PluginBuilder\Plugin\Hookable;
 /**
  * Can enqueue assets.
  */

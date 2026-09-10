@@ -180,14 +180,14 @@ final class Kernel
         if (is_string($environment) && $environment !== '') {
             return $environment;
         }
+        if (strpos($plugin->get_version(), 'dev') !== \false) {
+            return 'development';
+        }
         if (function_exists('wp_get_environment_type')) {
             $wp_environment = wp_get_environment_type();
             if ($wp_environment !== '') {
                 return $wp_environment;
             }
-        }
-        if (strpos($plugin->get_version(), 'dev') !== \false) {
-            return 'development';
         }
         return 'production';
     }

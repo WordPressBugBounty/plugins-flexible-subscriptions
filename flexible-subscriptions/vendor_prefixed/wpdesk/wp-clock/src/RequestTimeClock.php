@@ -12,7 +12,7 @@ class RequestTimeClock implements ClockInterface
 {
     public function now(): DateTimeImmutable
     {
-        $request_time = isset($_SERVER['REQUEST_TIME']) ? absint($_SERVER['REQUEST_TIME']) : 0;
+        $request_time = isset($_SERVER['REQUEST_TIME']) ? absint($_SERVER['REQUEST_TIME']) : time();
         return (new DateTimeImmutable("@{$request_time}"))->setTimezone(wp_timezone());
     }
 }

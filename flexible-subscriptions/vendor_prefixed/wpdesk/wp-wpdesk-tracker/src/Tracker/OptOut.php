@@ -3,7 +3,6 @@
 namespace WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Tracker;
 
 use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\Notice\Notice;
-use WPDesk\FlexibleSubscriptions\Vendor\WPDesk\PluginBuilder\Plugin\Hookable;
 class OptOut implements Hookable
 {
     /**

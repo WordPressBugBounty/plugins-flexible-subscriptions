@@ -32,7 +32,7 @@ final class Status {
 	}
 
 	public static function nice_name( string $status ): string {
-		if ( ! str_starts_with( 'wc-', $status ) ) {
+		if ( ! str_starts_with( $status, 'wc-' ) ) {
 			$status = 'wc-' . $status;
 		}
 		return self::get_statuses()[ $status ] ?? _x( 'Unknown', 'Subscription status', 'flexible-subscriptions' );

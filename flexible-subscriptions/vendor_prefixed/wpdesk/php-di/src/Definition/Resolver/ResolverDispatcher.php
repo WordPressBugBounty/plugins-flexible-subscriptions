@@ -6,7 +6,6 @@ namespace WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\Resolver;
 use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\ArrayDefinition;
 use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\DecoratorDefinition;
 use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\Definition;
-use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\EnvironmentVariableDefinition;
 use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\Exception\InvalidDefinition;
 use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\FactoryDefinition;
 use WPDesk\FlexibleSubscriptions\Vendor\DI\Definition\InstanceDefinition;
@@ -37,7 +36,6 @@ class ResolverDispatcher implements DefinitionResolver
     private $decoratorResolver;
     private $objectResolver;
     private $instanceResolver;
-    private $envVariableResolver;
     public function __construct(ContainerInterface $container, ProxyFactory $proxyFactory)
     {
         $this->container = $container;
@@ -99,11 +97,6 @@ class ResolverDispatcher implements DefinitionResolver
                     $this->arrayResolver = new ArrayResolver($this);
                 }
                 return $this->arrayResolver;
-            case $definition instanceof EnvironmentVariableDefinition:
-                if (!$this->envVariableResolver) {
-                    $this->envVariableResolver = new EnvironmentVariableResolver($this);
-                }
-                return $this->envVariableResolver;
             case $definition instanceof InstanceDefinition:
                 if (!$this->instanceResolver) {
                     $this->instanceResolver = new InstanceInjector($this, $this->proxyFactory);
