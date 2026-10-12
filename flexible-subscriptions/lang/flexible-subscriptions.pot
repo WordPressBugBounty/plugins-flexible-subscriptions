@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Flexible Subscriptions 1.8.6\n"
+"Project-Id-Version: Flexible Subscriptions 1.8.7\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/flexible-subscriptions\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-07T01:10:39+00:00\n"
+"POT-Creation-Date: 2026-10-12T12:46:07+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: flexible-subscriptions\n"
@@ -640,19 +640,19 @@ msgstr ""
 msgid "Initial Shipment"
 msgstr ""
 
-#: src/HookProvider/Coupons/SubscriptionCouponTypes.php:81
+#: src/HookProvider/Coupons/SubscriptionCouponTypes.php:94
 msgid "Sign Up Fee Discount"
 msgstr ""
 
-#: src/HookProvider/Coupons/SubscriptionCouponTypes.php:82
+#: src/HookProvider/Coupons/SubscriptionCouponTypes.php:95
 msgid "Sign Up Fee % Discount"
 msgstr ""
 
-#: src/HookProvider/Coupons/SubscriptionCouponTypes.php:83
+#: src/HookProvider/Coupons/SubscriptionCouponTypes.php:96
 msgid "Recurring Product Discount"
 msgstr ""
 
-#: src/HookProvider/Coupons/SubscriptionCouponTypes.php:84
+#: src/HookProvider/Coupons/SubscriptionCouponTypes.php:97
 msgid "Recurring Product % Discount"
 msgstr ""
 

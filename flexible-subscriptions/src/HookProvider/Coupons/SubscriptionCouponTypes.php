@@ -8,6 +8,7 @@ use WPDesk\FlexibleSubscriptions\Discount\CalculatorFactory;
 use WPDesk\FlexibleSubscriptions\Discount\DiscountingItem;
 use WPDesk\FlexibleSubscriptions\Product\SubscriptionProduct;
 use WPDesk\FlexibleSubscriptions\Product\SubscriptionProductWrapper;
+use WPDesk\FlexibleSubscriptions\Utils\CartContext;
 use WPDesk\FlexibleSubscriptions\Utils\HookProvider;
 use WPDesk\FlexibleSubscriptions\Vendor\Psr\Log\LoggerInterface;
 
@@ -44,10 +45,15 @@ final class SubscriptionCouponTypes implements HookProvider {
 
 	private LoggerInterface $logger;
 
+	private CartContext $cart_context;
 
-	public function __construct( CalculatorFactory $calculator_factory, LoggerInterface $logger ) {
+	/** @var array<string, array<string, int>> */
+	private array $coupon_quantities = [];
+
+	public function __construct( CalculatorFactory $calculator_factory, LoggerInterface $logger, CartContext $cart_context ) {
 		$this->calculator_factory = $calculator_factory;
 		$this->logger             = $logger;
+		$this->cart_context       = $cart_context;
 	}
 
 	private const DISCOUNT_TYPES = [
@@ -58,6 +64,7 @@ final class SubscriptionCouponTypes implements HookProvider {
 	];
 
 	public function hooks(): void {
+		add_action( 'woocommerce_before_calculate_totals', [ $this, 'reset_coupon_quantities' ], 5 );
 		add_filter( 'woocommerce_coupon_discount_types', [ $this, 'add_discount_types' ] );
 		add_filter( 'woocommerce_product_coupon_types', [ $this, 'add_product_discount_types' ] );
 
@@ -67,6 +74,12 @@ final class SubscriptionCouponTypes implements HookProvider {
 		add_filter( 'woocommerce_coupon_is_valid_for_product', [ $this, 'validate_subscription_coupon_for_product' ], 10, 3 );
 
 		add_filter( 'woocommerce_coupon_get_apply_quantity', [ $this, 'override_applied_quantity_for_recurring_carts' ], 10, 3 );
+	}
+
+	public function reset_coupon_quantities( \WC_Cart $cart ): void {
+		if ( $cart === $this->cart_context->get_real_global_cart() ) {
+			$this->coupon_quantities = [];
+		}
 	}
 
 	/**
@@ -233,7 +246,8 @@ final class SubscriptionCouponTypes implements HookProvider {
 	 * each recurring cart leading to the limit really being x * number-of-recurring-carts.
 	 *
 	 * This function overrides that by ensuring the limit is accounted for across all recurring carts.
-	 * The items which the coupon applied to in initial cart are the items in recurring carts that the coupon will apply to.
+	 * Preserve the initial cart allocation and share any unused allowance with eligible recurring
+	 * items, including free trials skipped because their initial price is zero.
 	 *
 	 * @param int       $apply_quantity The item quantity to apply the coupon to.
 	 * @param object    $item The stdClass cart item object. @see WC_Discounts::set_items_from_cart() for an example of object properties.
@@ -242,6 +256,28 @@ final class SubscriptionCouponTypes implements HookProvider {
 	 * @return int The item quantity to apply the coupon to.
 	 */
 	public function override_applied_quantity_for_recurring_carts( $apply_quantity, $item, $coupon ) {
-		return $apply_quantity;
+		if (
+			! in_array( $coupon->get_discount_type(), [ 'recurring_fee', 'recurring_percent' ], true ) ||
+			! $coupon->get_limit_usage_to_x_items() ||
+			! is_array( $item->object )
+		) {
+			return $apply_quantity;
+		}
+
+		$code = $coupon->get_code();
+		// Recurring carts use numeric indexes but retain the original key in the cart item.
+		$key = $item->object['key'] ?? $item->key;
+
+		if ( WC()->cart === $this->cart_context->get_real_global_cart() ) {
+			$this->coupon_quantities[ $code ][ $key ] = max( 0, (int) $apply_quantity );
+			return $apply_quantity;
+		}
+
+		if ( ! isset( $this->coupon_quantities[ $code ][ $key ] ) ) {
+			$remaining = max( 0, (int) $coupon->get_limit_usage_to_x_items() - array_sum( $this->coupon_quantities[ $code ] ?? [] ) );
+			$this->coupon_quantities[ $code ][ $key ] = min( (int) $apply_quantity, $remaining );
+		}
+
+		return min( $apply_quantity, $this->coupon_quantities[ $code ][ $key ] ?? 0 );
 	}
 }
