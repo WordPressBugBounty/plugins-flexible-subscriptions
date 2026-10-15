@@ -38,6 +38,7 @@
     "ActionScheduler_QueueCleaner",
     "ActionScheduler_QueueRunner",
     "ActionScheduler_RecurringActionScheduler",
+    "ActionScheduler_ScheduleDeserializer",
     "ActionScheduler_Schedule_Deprecated",
     "ActionScheduler_SimpleSchedule",
     "ActionScheduler_Store",

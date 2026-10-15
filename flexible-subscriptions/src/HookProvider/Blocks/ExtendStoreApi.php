@@ -141,7 +141,7 @@ class ExtendStoreApi implements HookProvider {
 				'totals'                       => $currency_formatter->format(
 					[
 						'total_items'        => $money_formatter->format( $candidate->get_subtotal() ),
-						'total_items_tax'    => $money_formatter->format( $candidate->get_cart_contents_tax() ),
+						'total_items_tax'    => $money_formatter->format( $candidate->get_cart()->get_subtotal_tax() ),
 						'total_fees'         => $money_formatter->format( $candidate->get_fee_total() ),
 						'total_fees_tax'     => $money_formatter->format( $candidate->get_fee_tax() ),
 						'total_discount'     => $money_formatter->format( $candidate->get_discount_total() ),

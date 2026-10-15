@@ -99,6 +99,9 @@ const OrderMetaForSubscriptions = ( { extensions, cart } ) => {
 		);
 
 		const shippingAmount = getSelectedShippingValue( totals );
+		const discountAmount = parseInt( totals.total_discount, 10 ) + (
+			displayCartPricesIncludingTax ? parseInt( totals.total_discount_tax, 10 ) : 0
+		);
 
 		const shippingValue = shippingAmount === 0
 			? <strong>{ __( 'Free', 'flexible-subscriptions' ) }</strong>
@@ -123,6 +126,16 @@ const OrderMetaForSubscriptions = ( { extensions, cart } ) => {
 					<TotalsWrapper>
 						<Subtotal currency={ currency } values={ totals } />
 					</TotalsWrapper>
+					{ discountAmount > 0 && (
+						<TotalsWrapper>
+							<TotalsItem
+								className="fsb-recurring-totals-panel__details-discount"
+								currency={ currency }
+								label={ __( 'Discount', 'flexible-subscriptions' ) }
+								value={ -discountAmount }
+							/>
+						</TotalsWrapper>
+					) }
 					{ cart.cartNeedsShipping && cart.cartHasCalculatedShipping &&
 						<TotalsWrapper className="wc-block-components-totals-shipping">
 							<TotalsItem

@@ -606,6 +606,7 @@
     "wc_update_670_delete_deprecated_remote_inbox_notifications_option",
     "wc_update_1040_add_idx_date_paid_status_parent",
     "wc_update_1050_add_idx_user_email",
+    "wc_update_11201_migrate_tax_lookup_order_items",
     "wc_update_attribute",
     "wc_update_coupon_usage_counts",
     "wc_update_new_customer_past_orders",
