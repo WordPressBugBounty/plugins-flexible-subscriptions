@@ -85,7 +85,14 @@ class SubscriptionProductWrapper {
 	}
 
 	public function is_one_time_shipping(): bool {
-		return filter_var( $this->get_meta( '_fsb_subscription_one_time_shipping' ), \FILTER_VALIDATE_BOOLEAN );
+		$one_time_shipping = $this->product->get_meta( '_fsb_subscription_one_time_shipping', true, 'edit' );
+
+		if ( $one_time_shipping === '' && $this->product instanceof SubscriptionProductVariation ) {
+			$parent            = wc_get_product( $this->product->get_parent_id() );
+			$one_time_shipping = $parent ? $parent->get_meta( '_fsb_subscription_one_time_shipping', true, 'edit' ) : '';
+		}
+
+		return filter_var( $one_time_shipping, \FILTER_VALIDATE_BOOLEAN );
 	}
 
 	public function get_price_html( array $include ): string {
