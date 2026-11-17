@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WPDesk\FlexibleSubscriptions\HookProvider\Admin\Subscription;
 
 use WPDesk\FlexibleSubscriptions\Subscription\Subscription;
+use WPDesk\FlexibleSubscriptions\Subscription\Renewal\Renewal;
 use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionFinderInterface;
 use WPDesk\FlexibleSubscriptions\Subscription\SubscriptionUpdater;
 use WPDesk\FlexibleSubscriptions\Subscription\Utils\Status;
@@ -39,7 +40,7 @@ class SubscriptionsList implements HookProvider {
 			add_filter( "bulk_actions-{$screen_id}", [ $this, 'bulk_actions' ] );
 			add_filter( "handle_bulk_actions-{$screen_id}", [ $this, 'handle_bulk_actions' ], 10, 3 );
 		}
-		// add_filter( 'woocommerce_fsb_subscription_list_table_prepare_items_query_args', array( $this, 'filter_subscription_list_table_request_query' ) );
+		add_filter( 'woocommerce_fsb_subscription_list_table_prepare_items_query_args', [ $this, 'search_related_orders' ] );
 	}
 
 	/** @param array<string, string> $actions */
@@ -165,7 +166,87 @@ class SubscriptionsList implements HookProvider {
 		if ( empty( $vars['post_status'] ) ) {
 			$vars['post_status'] = array_keys( Status::get_statuses() );
 		}
+
+		if ( isset( $vars['s'] ) && trim( (string) $vars['s'] ) !== '' ) {
+			$term = ltrim( trim( (string) $vars['s'] ), '#' );
+			$ids  = ( new \WC_Order_Data_Store_CPT() )->search_orders( $term );
+			$ids  = array_merge( $ids, $this->related_subscription_ids( $term ) );
+			$ids  = array_unique( array_map( 'intval', $ids ) );
+			if ( ! empty( $vars['post__in'] ) ) {
+				$ids = array_values( array_intersect( $vars['post__in'], $ids ) );
+			}
+			$vars['post__in'] = $ids ?: [ 0 ];
+			unset( $vars['s'] );
+		}
 		return $vars;
+	}
+
+	/**
+	 * Keep native HPOS text search, adding subscriptions linked to a searched order ID.
+	 *
+	 * @param array<string, mixed> $query_args
+	 * @return array<string, mixed>
+	 */
+	public function search_related_orders( array $query_args ): array {
+		$term = ltrim( trim( (string) ( $query_args['s'] ?? '' ) ), '#' );
+		if ( ! ctype_digit( $term ) || ! in_array( $query_args['search_filter'] ?? 'all', [ '', 'all', 'order_id' ], true ) ) {
+			return $query_args;
+		}
+		$query_args['s'] = $term;
+
+		$related_ids = $this->related_subscription_ids( $term );
+		if ( $related_ids === [] ) {
+			return $query_args;
+		}
+
+		$ids = wc_get_orders(
+			[
+				'type'          => Subscription::OBJECT_TYPE,
+				'status'        => 'any',
+				's'             => $query_args['s'],
+				'search_filter' => $query_args['search_filter'] ?? 'all',
+				'limit'         => -1,
+				'return'        => 'ids',
+			]
+		);
+		$ids = array_unique( array_merge( $ids, $related_ids ) );
+		if ( ! empty( $query_args['id'] ) ) {
+			$ids = array_values( array_intersect( (array) $query_args['id'], $ids ) );
+		}
+		$query_args['id'] = $ids ?: [ 0 ];
+		unset( $query_args['s'] );
+
+		return $query_args;
+	}
+
+	/** @return int[] */
+	private function related_subscription_ids( string $term ): array {
+		if ( ! ctype_digit( $term ) ) {
+			return [];
+		}
+
+		$ids = wc_get_orders(
+			[
+				'type'   => Subscription::OBJECT_TYPE,
+				'status' => 'any',
+				'parent' => (int) $term,
+				'limit'  => -1,
+				'return' => 'ids',
+			]
+		);
+		$order = wc_get_order( (int) $term );
+		if ( $order instanceof \WC_Order && Renewal::is_renewal_order( $order ) ) {
+			$ids[] = (int) $order->get_meta( Renewal::META_SUBSCRIPTION_ID, true );
+		}
+
+		return array_values(
+			array_filter(
+				array_map( 'intval', $ids ),
+				static function ( int $id ): bool {
+					return $id > 0;
+				}
+			)
+		);
 	}
 
 	/**

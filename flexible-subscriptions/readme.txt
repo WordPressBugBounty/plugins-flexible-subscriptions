@@ -6,7 +6,7 @@ Donate link: https://wpdesk.net/sk/flexible-subscriptions-rm-donate
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.8.9
+Stable tag: 1.8.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -160,6 +160,9 @@ Please report security bugs found in the source code of the Flexible Subscriptio
 19. Support tab with quick instructions about the plugin.
 
 == Changelog ==
+
+= 1.8.10 - 2026-11-17 =
+* Fixed subscription search in admin view.
 
 = 1.8.9 - 2026-10-22 =
 * Fixed subscription variations inheriting the one-time shipping setting from their parent product.
