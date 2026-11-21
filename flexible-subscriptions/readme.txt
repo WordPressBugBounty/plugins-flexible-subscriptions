@@ -4,9 +4,9 @@ Tags: subscriptions, woocommerce, recurring payments, subscription management, r
 Author URL: https://wpdesk.net/sk/flexible-subscriptions-rm-author
 Donate link: https://wpdesk.net/sk/flexible-subscriptions-rm-donate
 Requires at least: 6.3
-Tested up to: 7.1
+Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 1.8.10
+Stable tag: 1.8.11
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -160,6 +160,9 @@ Please report security bugs found in the source code of the Flexible Subscriptio
 19. Support tab with quick instructions about the plugin.
 
 == Changelog ==
+
+= 1.8.11 - 2026-11-21 =
+* Added support for WordPress 7.2
 
 = 1.8.10 - 2026-11-17 =
 * Fixed subscription search in admin view.
